@@ -27,7 +27,11 @@ def buyLotsOfFruit(orderList):
     Returns cost of order
     """ 
     totalCost = 0.0             
-    "*** YOUR CODE HERE ***"
+    for fruit, pounds in orderList:
+        price = fruitPrices.get(fruit)
+        if not price:
+            return None
+        totalCost += pounds * price
     return totalCost
     
 # Main Method    
