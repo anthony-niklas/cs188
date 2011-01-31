@@ -67,6 +67,39 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return    [s,s,w,s,w,w,s,w]
 
+class Node:
+    def __init__(self, parent, data):
+        self.parent = parent
+        self.data = data
+          
+def _search(problem, DataStructure):
+    fringe = DataStructure()
+    fringe.push(Node(None, (problem.getStartState(), None, 0)))
+    explored = set()
+
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        state, action, cost = node.data
+        explored.add(state)
+        if problem.isGoalState(state):
+            # Solved
+            solution = []
+            current = node
+            while current is not None:
+                state, action, cost = current.data
+                solution.append(action)
+                current = current.parent
+                
+            solution.reverse()
+            return solution[1:]
+        else:
+            for applicable in problem.getSuccessors(state):
+                if applicable[0] not in explored:
+                    fringe.push(Node(node, applicable))
+
+    # No solution
+    return []
+  
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first
@@ -78,21 +111,21 @@ def depthFirstSearch(problem):
     
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
-    
+
     print "Start:", problem.getStartState()
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    return _search(problem, util.Stack)
+    
 def breadthFirstSearch(problem):
     """
     Search the shallowest nodes in the search tree first.
     [2nd Edition: p 73, 3rd Edition: p 82]
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return _search(problem, util.Queue)
             
 def uniformCostSearch(problem):
     "Search the node of least total cost first. "
