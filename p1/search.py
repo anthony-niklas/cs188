@@ -72,34 +72,39 @@ class Node:
         self.parent = parent
         self.data = data
           
-def _search(problem, DataStructure):
-    fringe = DataStructure()
+def _search(problem, fringe):
+    
     fringe.push(Node(None, (problem.getStartState(), None, 0)))
     explored = set()
-
+    expanded = []
+    
     while not fringe.isEmpty():
         node = fringe.pop()
         state, action, cost = node.data
-        explored.add(state)
         if problem.isGoalState(state):
             # Solved
             solution = []
             current = node
             while current is not None:
                 state, action, cost = current.data
-                solution.append(action)
+                # Don't append the root node to the solution
+                current.parent and solution.append(action)
                 current = current.parent
-                
+
             solution.reverse()
-            return solution[1:]
+            return solution
         else:
             for applicable in problem.getSuccessors(state):
-                if applicable[0] not in explored:
+                reachableState, _, _ = applicable
+                if reachableState not in explored:
+                    # If not in fringe:
+                    # Only push onto fringe if applicable's state is not in fringe
                     fringe.push(Node(node, applicable))
-
+                    explored.add(reachableState)
+                    
     # No solution
     return []
-  
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first
@@ -117,21 +122,52 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    return _search(problem, util.Stack)
-    
+    return _search(problem, util.Stack())
+
 def breadthFirstSearch(problem):
     """
     Search the shallowest nodes in the search tree first.
     [2nd Edition: p 73, 3rd Edition: p 82]
     """
     "*** YOUR CODE HERE ***"
-    return _search(problem, util.Queue)
+    return _search(problem, util.Queue())
             
 def uniformCostSearch(problem):
     "Search the node of least total cost first. "
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    fringe = util.PriorityQueueWithFunction(lambda node: node.data[2])
+    fringe.push(Node(None, (problem.getStartState(), None, 0)))
+    explored = set()
+    expanded = []
+    
+    while not fringe.isEmpty():
+        node = fringe.pop()
+        state, action, cost = node.data
+        explored.add(state)
+        
+        for applicable in problem.getSuccessors(state):
+            newState, newAction, newCost = applicable
+            if newState not in explored:
+                explored.add(newState)
+                newNode = Node(node, applicable)
+                if problem.isGoalState(newState):
+                    # Solved
+                    solution = []
+                    current = newNode
+                    while current is not None:
+                        state, action, cost = current.data
+                        # Don't append the root node to the solution
+                        current.parent and solution.append(action)
+                        current = current.parent
+        
+                    solution.reverse()
+                    return solution
+                    
+                fringe.push(Node(node, applicable))
+                    
+    # No solution
+    return []
+    
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
