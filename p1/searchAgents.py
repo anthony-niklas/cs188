@@ -275,19 +275,24 @@ class CornersProblem(search.SearchProblem):
             if not startingGameState.hasFood(*corner):
                 print 'Warning: no food in corner ' + str(corner)
         self._expanded = 0 # Number of search nodes expanded
-        
         "*** YOUR CODE HERE ***"
         
     def getStartState(self):
         "Returns the start state (in your state space, not the full Pacman state space)"
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        bottomLeft, topLeft, bottomRight, topRight = self.corners
+        
+        return (self.startingPosition, 
+                self.startingPosition == bottomLeft, 
+                self.startingPosition == topLeft,
+                self.startingPosition == bottomRight,
+                self.startingPosition == topRight) 
         
     def isGoalState(self, state):
         "Returns whether this search state is a goal state of the problem"
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-             
+        return False not in state[1:]
+    
     def getSuccessors(self, state):
         """
         Returns successor states, the actions they require, and a cost of 1.
@@ -299,17 +304,31 @@ class CornersProblem(search.SearchProblem):
          required to get there, and 'stepCost' is the incremental 
          cost of expanding to that successor
         """
-        
         successors = []
+        position, bottomLeft, topLeft, bottomRight, topRight = state
+        x, y = position
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
-            #     x,y = currentPosition
-            #     dx, dy = Actions.directionToVector(action)
-            #     nextx, nexty = int(x + dx), int(y + dy)
-            #     hitsWall = self.walls[nextx][nexty]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
             
+            newState = [(nextx, nexty), bottomLeft, topLeft, bottomRight, topRight]
+            if (nextx, nexty) in self.corners:
+                if (nextx, nexty) == self.corners[0]:
+                    newState[1] = True
+                elif (nextx, nexty) == self.corners[1]:
+                    newState[2] = True
+                elif (nextx, nexty) == self.corners[2]:
+                    newState[3] = True
+                elif (nextx, nexty) == self.corners[3]:
+                    newState[4] = True
+                
+            newSuccessor = (tuple(newState), action, 1)
             "*** YOUR CODE HERE ***"
+            if not hitsWall:
+                successors.append(newSuccessor)
             
         self._expanded += 1
         return successors
