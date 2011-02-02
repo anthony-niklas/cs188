@@ -130,18 +130,16 @@ def breadthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
     return _search(problem, util.Queue())
-          
-def _inHeap(state, myCost, heap):
+     
+def _isBetterNode(node, heap):
     for p, h in heap:
-        if h.data[0] == state and h.data[2] > myCost:
+        if h.data[0] == node.data[0] and h.data[2] > node.data[2]:
             return True
     
     return False
   
-def uniformCostSearch(problem):
-    "Search the node of least total cost first. "
-    "*** YOUR CODE HERE ***"
-    fringe = util.PriorityQueueWithFunction(lambda node: node.data[2])
+def _ucs(problem, costFn):
+    fringe = util.PriorityQueueWithFunction(costFn)
     root = Node(None, (problem.getStartState(), None, 0))
     fringe.push(root)
     explored = set()
@@ -152,7 +150,6 @@ def uniformCostSearch(problem):
         
         node = fringe.pop()
         state, action, cost = node.data
-        
         if problem.isGoalState(state):
             # Solved
             solution = []
@@ -167,16 +164,13 @@ def uniformCostSearch(problem):
             return solution
         
         explored.add(state)
-        
         for applicable in problem.getSuccessors(state):
             newState, newAction, newCost = applicable
             newCost += cost
-            
             child = Node(node, (newState, newAction, newCost))
             if newState not in explored:
                 fringe.push(child)
-            elif _inHeap(newState, newCost, fringe.heap):
-                
+            elif _isBetterNode(child, fringe.heap):
                 temp = []
                 while not fringe.isEmpty():
                     temp.append(fringe.pop())
@@ -186,7 +180,11 @@ def uniformCostSearch(problem):
                         fringe.push(t)
                         
                 fringe.push(child)
-
+                
+def uniformCostSearch(problem):
+    "Search the node of least total cost first. "
+    "*** YOUR CODE HERE ***"
+    return _ucs(problem, lambda node: node.data[2])
 
     
 def nullHeuristic(state, problem=None):
@@ -200,7 +198,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
     "*** YOUR CODE HERE ***"
     # identical to UCS except it uses g+h instead of g+0
-    util.raiseNotDefined()
+    return _ucs(problem, lambda node: node.data[2] + heuristic(node.data[0], problem))
         
     
 # Abbreviations
