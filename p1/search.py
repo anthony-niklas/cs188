@@ -76,7 +76,6 @@ def _search(problem, fringe):
     
     fringe.push(Node(None, (problem.getStartState(), None, 0)))
     explored = set()
-    expanded = []
     
     while not fringe.isEmpty():
         node = fringe.pop()
@@ -131,11 +130,64 @@ def breadthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
     return _search(problem, util.Queue())
-            
+          
+def _inHeap(state, myCost, heap):
+    for p, h in heap:
+        if h.data[0] == state and h.data[2] > myCost:
+            return True
+    
+    return False
+  
 def uniformCostSearch(problem):
     "Search the node of least total cost first. "
     "*** YOUR CODE HERE ***"
-    return _search(problem, util.PriorityQueueWithFunction(lambda node: node.data[2] + (node.parent and node.parent.data[2] or 0)))
+    fringe = util.PriorityQueueWithFunction(lambda node: node.data[2])
+    root = Node(None, (problem.getStartState(), None, 0))
+    fringe.push(root)
+    explored = set()
+    
+    while True:
+        if fringe.isEmpty():
+            return []
+        
+        node = fringe.pop()
+        state, action, cost = node.data
+        
+        if problem.isGoalState(state):
+            # Solved
+            solution = []
+            current = node
+            while current is not None:
+                state, action, cost = current.data
+                # Don't append the root node to the solution
+                current.parent and solution.append(action)
+                current = current.parent
+
+            solution.reverse()
+            return solution
+        
+        explored.add(state)
+        
+        for applicable in problem.getSuccessors(state):
+            newState, newAction, newCost = applicable
+            newCost += cost
+            
+            child = Node(node, (newState, newAction, newCost))
+            if newState not in explored:
+                fringe.push(child)
+            elif _inHeap(newState, newCost, fringe.heap):
+                
+                temp = []
+                while not fringe.isEmpty():
+                    temp.append(fringe.pop())
+                    
+                for t in temp:
+                    if t.data[0] != newState:
+                        fringe.push(t)
+                        
+                fringe.push(child)
+
+
     
 def nullHeuristic(state, problem=None):
     """
@@ -147,6 +199,7 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
     "*** YOUR CODE HERE ***"
+    # identical to UCS except it uses g+h instead of g+0
     util.raiseNotDefined()
         
     
