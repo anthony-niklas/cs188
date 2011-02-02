@@ -316,19 +316,14 @@ class CornersProblem(search.SearchProblem):
             
             newState = [(nextx, nexty), bottomLeft, topLeft, bottomRight, topRight]
             if (nextx, nexty) in self.corners:
-                if (nextx, nexty) == self.corners[0]:
-                    newState[1] = True
-                elif (nextx, nexty) == self.corners[1]:
-                    newState[2] = True
-                elif (nextx, nexty) == self.corners[2]:
-                    newState[3] = True
-                elif (nextx, nexty) == self.corners[3]:
-                    newState[4] = True
+                for i, corner in enumerate(self.corners):
+                    if (nextx, nexty) == corner:
+                        newState[i + 1] = True
+                        break
                 
             newSuccessor = (tuple(newState), action, 1)
             "*** YOUR CODE HERE ***"
-            if not hitsWall:
-                successors.append(newSuccessor)
+            not hitsWall and successors.append(newSuccessor)
             
         self._expanded += 1
         return successors
