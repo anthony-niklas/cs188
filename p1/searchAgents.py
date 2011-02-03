@@ -456,21 +456,14 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    if len(foodGrid.asList()) == 0:
+    food = foodGrid.asList()
+    if len(food) == 0:
         return 0
+
+    closestFood, closestCost = min([(f, util.manhattanDistance(f, position)) for f in food], key=lambda t: t[1])
     
-    # foodGrid.asList()
-    # problem.walls
-    
-    # solution depends on walls, regular food, and Pacman
-    # problem.heuristicInfo -> {}
-    
-    # Goal state is when there is no food left
-    # We want to estimate how many moves it will take to consume the remaining food
-    #closestFood = min([util.manhattanDistance(position, f) for f in foodGrid.asList()])
-    #import pdb; pdb.set_trace()
-    return foodGrid.count()
+    # subtract 1 so we don't double count the closest food
+    return foodGrid.count() + closestCost - 1
     
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
