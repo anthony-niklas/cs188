@@ -457,7 +457,20 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    if len(foodGrid.asList()) == 0:
+        return 0
+    
+    # foodGrid.asList()
+    # problem.walls
+    
+    # solution depends on walls, regular food, and Pacman
+    # problem.heuristicInfo -> {}
+    
+    # Goal state is when there is no food left
+    # We want to estimate how many moves it will take to consume the remaining food
+    #closestFood = min([util.manhattanDistance(position, f) for f in foodGrid.asList()])
+    #import pdb; pdb.set_trace()
+    return foodGrid.count()
     
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -483,9 +496,9 @@ class ClosestDotSearchAgent(SearchAgent):
         food = gameState.getFood()
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
-
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        return search.breadthFirstSearch(problem)
     
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -521,7 +534,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
         
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return state in self.food.asList()
 
 ##################
 # Mini-contest 1 #
