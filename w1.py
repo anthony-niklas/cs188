@@ -1,10 +1,5 @@
 from networkx import *
 
-# Construct a graph
-
-# h = { edge: h value }
-# g = { edge: w }
-
 G = Graph()
 
 G.add_node('Odessa',    h=20)
@@ -25,7 +20,6 @@ G.add_edge('Warsaw', 'Budapest',    weight=0)
 G.add_edge('Odessa', 'Venice',      weight=0)
 
 G.add_edge('Venice', 'Rome',        weight=0)
-
 
 # Greedy, no edge weights in this graph
 print 'Greedy: ', algorithms.shortest_paths.astar.astar_path(G, 'Warsaw', 'Rome', heuristic=lambda s, d: G.node[s]['h'])
@@ -51,7 +45,7 @@ G.add_edge('Odessa', 'Venice',      weight=14)
 
 G.add_edge('Venice', 'Rome',        weight=6)
 
-# A*, now using edge weights
+# A*, g>=0
 print 'A*: ', algorithms.shortest_paths.astar.astar_path(G, 'Warsaw', 'Rome', heuristic=lambda s, d: G.node[s]['h'])
 
 # UCS, h=0
