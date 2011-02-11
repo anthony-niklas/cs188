@@ -14,17 +14,17 @@ G.add_node('Rome',      h=0)
 G.add_node('Warsaw',    h=30)
 G.add_node('Venice',    h=3)
 
-G.add_edge('Munich', 'Warsaw')
-G.add_edge('Munich', 'Rome')
-G.add_edge('Munich', 'Budapest')
-G.add_edge('Munich', 'Venice')
+G.add_edge('Munich', 'Warsaw',      weight=0)
+G.add_edge('Munich', 'Rome',        weight=0)
+G.add_edge('Munich', 'Budapest',    weight=0)
+G.add_edge('Munich', 'Venice',      weight=0)
 
-G.add_edge('Warsaw', 'Odessa')
-G.add_edge('Warsaw', 'Budapest')
+G.add_edge('Warsaw', 'Odessa',      weight=0)
+G.add_edge('Warsaw', 'Budapest',    weight=0)
 
-G.add_edge('Odessa', 'Venice')
+G.add_edge('Odessa', 'Venice',      weight=0)
 
-G.add_edge('Venice', 'Rome')
+G.add_edge('Venice', 'Rome',        weight=0)
 
 
 # Greedy, no edge weights in this graph
