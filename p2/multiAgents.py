@@ -67,8 +67,24 @@ class ReflexAgent(Agent):
     newGhostStates = successorGameState.getGhostStates()
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
+    newFoodList = newFood.asList()
+    closestFood = newFoodList and min([util.manhattanDistance(newPos, foodPos) for foodPos in newFoodList]) or 0
+    foodScore = closestFood and 1.0 / float(closestFood)
+    closestGhostDist = min([util.manhattanDistance(newPos, ghostState.getPosition()) for ghostState in newGhostStates])
+    scaredScore = sum(newScaredTimes)
+
+    # 1/dist(closestFood) + totalMdistFromEachGhost + sum(newScaredTimes)
+    #import pdb; pdb.set_trace()
+    # The choice made by MINIMAX is chosen based on the ENTIRE
+    # game being played out if we were to take that choice: we take turns playing out
+    # our best choice against the opponents best choice until the game is over, all
+    # when choosing a single move at the root. Since it is often unnecessary to play out the
+    # entire game to determine how good the choice will end up being, we use an evaluation 
+    # function at non-leaf nodes at a certain level to estimate the probability of a win
+    # as a result of taking the original choice at the root.
+    
     "*** YOUR CODE HERE ***"
-    return successorGameState.getScore()
+    return successorGameState.getScore() + sum([foodScore * closestGhostDist, scaredScore])
 
 def scoreEvaluationFunction(currentGameState):
   """
