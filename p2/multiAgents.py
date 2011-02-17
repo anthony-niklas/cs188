@@ -261,13 +261,15 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             if TERMINAL(state, depth):
                 return self.evaluationFunction(state)
 
-            v = INFINITY
+            total = 0
+            count = 0
             for ghost in GHOSTS:
                 for action in state.getLegalActions(ghost):
                     successor = state.generateSuccessor(ghost, action)
-                    v = min(v, MAX_VALUE(successor, depth - 1))
+                    total += MAX_VALUE(successor, depth - 1)
+                    count += 1
                 
-            return v
+            return float(total) / float(count)
         
         def MAX_VALUE(state, depth):
             if TERMINAL(state, depth):
@@ -292,7 +294,8 @@ def betterEvaluationFunction(currentGameState):
         DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    return currentGameState.getScore()
 
 # Abbreviation
 better = betterEvaluationFunction
