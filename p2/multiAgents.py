@@ -181,6 +181,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return v
         
         action, value = MINIMAX_DECISION(gameState, self.depth)
+        
         return action
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
@@ -193,7 +194,47 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        PACMAN = 0
+        GHOSTS = range(1, gameState.getNumAgents())
+        INFINITY = 1e308
+        
+        def TERMINAL(state, depth):
+            return state.isWin() or state.isLose() or depth < 0
+        
+        def MINIMAX_DECISION(state, depth):
+                actions = filter(lambda a: a != Directions.STOP, state.getLegalActions(PACMAN))
+                results = [(action, MIN_VALUE(state.generateSuccessor(PACMAN, action), depth)) for action in actions]
+                action, value = max(results, key=lambda t: t[1])
+                
+                return action, value
+        
+        def MIN_VALUE(state, depth):
+            if TERMINAL(state, depth):
+                return self.evaluationFunction(state)
+
+            v = INFINITY
+            for ghost in GHOSTS:
+                for action in state.getLegalActions(ghost):
+                    successor = state.generateSuccessor(ghost, action)
+                    v = min(v, MAX_VALUE(successor, depth - 1))
+                
+            return v
+        
+        def MAX_VALUE(state, depth):
+            if TERMINAL(state, depth):
+                return self.evaluationFunction(state)
+
+            v = -INFINITY
+            for action in filter(lambda a: a != Directions.STOP, state.getLegalActions(PACMAN)):
+                successor = state.generateSuccessor(PACMAN, action)
+                v = max(v, MIN_VALUE(successor, depth - 1))
+                
+            return v
+        
+        action, value = MINIMAX_DECISION(gameState, self.depth)
+        
+        return action
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
