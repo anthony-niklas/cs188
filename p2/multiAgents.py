@@ -142,20 +142,16 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         
         "*** YOUR CODE HERE ***"
-        # The terminal value for agent n is the utility vector of whichever successor state has the 
-        # highest value for the player choosing at n
+
         PACMAN = 0
         GHOSTS = range(1, gameState.getNumAgents())
         INFINITY = 1e308
+        
         def TERMINAL(state, depth):
             return state.isWin() or state.isLose() or depth < 0
         
         def MINIMAX_DECISION(state, depth):
-                # Return a vector of utilities for each agent
-                # The best utility for a node is the vector where its corresponding entry is the best
                 actions = filter(lambda a: a != Directions.STOP, state.getLegalActions(PACMAN))
-                
-                # Maximum minimum from successor states
                 results = [(action, MIN_VALUE(state.generateSuccessor(PACMAN, action), depth)) for action in actions]
                 action, value = max(results, key=lambda t: t[1])
                 
@@ -169,7 +165,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
             for ghost in GHOSTS:
                 for action in state.getLegalActions(ghost):
                     successor = state.generateSuccessor(ghost, action)
-                    # Take the vector with the highest value for this ghost
                     v = min(v, MAX_VALUE(successor, depth - 1))
                 
             return v
@@ -181,16 +176,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
             v = -INFINITY
             for action in filter(lambda a: a != Directions.STOP, state.getLegalActions(PACMAN)):
                 successor = state.generateSuccessor(PACMAN, action)
-                # Take the vector with the highest value for this ghost
                 v = max(v, MIN_VALUE(successor, depth - 1))
                 
             return v
         
         action, value = MINIMAX_DECISION(gameState, self.depth)
-        #import pdb; pdb.set_trace()
         return action
-
-
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """        
