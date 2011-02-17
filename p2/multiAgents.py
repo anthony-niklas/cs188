@@ -72,16 +72,6 @@ class ReflexAgent(Agent):
         foodScore = closestFood and 1.0 / float(closestFood)
         closestGhostDist = min([util.manhattanDistance(newPos, ghostState.getPosition()) for ghostState in newGhostStates])
         scaredScore = sum(newScaredTimes)
-
-        # 1/dist(closestFood) + totalMdistFromEachGhost + sum(newScaredTimes)
-        #import pdb; pdb.set_trace()
-        # The choice made by MINIMAX is chosen based on the ENTIRE
-        # game being played out if we were to take that choice: we take turns playing out
-        # our best choice against the opponents best choice until the game is over, all
-        # when choosing a single move at the root. Since it is often unnecessary to play out the
-        # entire game to determine how good the choice will end up being, we use an evaluation 
-        # function at non-leaf nodes at a certain level to estimate the probability of a win
-        # as a result of taking the original choice at the root.
         
         "*** YOUR CODE HERE ***"
         return successorGameState.getScore() + sum([foodScore * closestGhostDist, scaredScore])
@@ -202,6 +192,64 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         def TERMINAL(state, depth):
             return state.isWin() or state.isLose() or depth < 0
         
+        def A_B_SEARCH(state, depth):
+                
+                actions = filter(lambda a: a != Directions.STOP, state.getLegalActions(PACMAN))
+                results = [(action, MIN_VALUE(state.generateSuccessor(PACMAN, action), depth, -INFINITY, INFINITY)) for action in actions]
+                action, value = max(results, key=lambda t: t[1])
+                
+                return action, value
+        
+        def MIN_VALUE(state, depth, a, b):
+            if TERMINAL(state, depth):
+                return self.evaluationFunction(state)
+
+            v = INFINITY
+            for ghost in GHOSTS:
+                for action in state.getLegalActions(ghost):
+                    successor = state.generateSuccessor(ghost, action)
+                    v = min(v, MAX_VALUE(successor, depth - 1, a, b))
+                    if v <= a: return v
+                    b = min(b, v)
+            return v
+        
+        def MAX_VALUE(state, depth, a, b):
+            if TERMINAL(state, depth):
+                return self.evaluationFunction(state)
+
+            v = -INFINITY
+            for action in filter(lambda a: a != Directions.STOP, state.getLegalActions(PACMAN)):
+                successor = state.generateSuccessor(PACMAN, action)
+                v = max(v, MIN_VALUE(successor, depth - 1, a, b))
+                if v >= b: return v
+                a = max(a, v)
+            return v
+        
+        action, value = A_B_SEARCH(gameState, self.depth)
+        
+        return action
+
+class ExpectimaxAgent(MultiAgentSearchAgent):
+    """
+        Your expectimax agent (question 4)
+    """
+
+    def getAction(self, gameState):
+        """
+            Returns the expectimax action using self.depth and self.evaluationFunction
+
+            All ghosts should be modeled as choosing uniformly at random from their
+            legal moves.
+        """
+        "*** YOUR CODE HERE ***"
+        
+        PACMAN = 0
+        GHOSTS = range(1, gameState.getNumAgents())
+        INFINITY = 1e308
+        
+        def TERMINAL(state, depth):
+            return state.isWin() or state.isLose() or depth < 0
+        
         def MINIMAX_DECISION(state, depth):
                 actions = filter(lambda a: a != Directions.STOP, state.getLegalActions(PACMAN))
                 results = [(action, MIN_VALUE(state.generateSuccessor(PACMAN, action), depth)) for action in actions]
@@ -235,21 +283,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         action, value = MINIMAX_DECISION(gameState, self.depth)
         
         return action
-
-class ExpectimaxAgent(MultiAgentSearchAgent):
-    """
-        Your expectimax agent (question 4)
-    """
-
-    def getAction(self, gameState):
-        """
-            Returns the expectimax action using self.depth and self.evaluationFunction
-
-            All ghosts should be modeled as choosing uniformly at random from their
-            legal moves.
-        """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
 
 def betterEvaluationFunction(currentGameState):
     """
