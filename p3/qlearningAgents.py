@@ -119,7 +119,7 @@ class QLearningAgent(ReinforcementAgent):
       it will be called on your behalf
     """
     "*** YOUR CODE HERE ***"
-    self.Q[(state, action)] += self.alpha * (reward + self.gamma * self.getValue(nextState) - self.Q[(state, action)])
+    self.Q[(state, action)] += self.alpha * (reward + self.discount * self.getValue(nextState) - self.Q[(state, action)])
     
 
 class PacmanQAgent(QLearningAgent):
