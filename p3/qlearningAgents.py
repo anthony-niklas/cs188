@@ -64,7 +64,7 @@ class QLearningAgent(ReinforcementAgent):
     actions = self.getLegalActions(state)
     q_vals = [0.0]
     for a in actions:
-        q_vals.append(self.Q[(state, a)])
+        q_vals.append(self.getQValue(state, a))
         
     return max(q_vals)
 
@@ -106,7 +106,7 @@ class QLearningAgent(ReinforcementAgent):
     
     if util.flipCoin(self.epsilon):
         return random.choice(legalActions)
-    
+
     return self.getPolicy(state)
 
   def update(self, state, action, nextState, reward):
@@ -119,7 +119,7 @@ class QLearningAgent(ReinforcementAgent):
       it will be called on your behalf
     """
     "*** YOUR CODE HERE ***"
-    self.Q[(state, action)] += self.alpha * (reward + self.discount * self.getValue(nextState) - self.Q[(state, action)])
+    self.Q[(state, action)] += self.alpha * (reward + self.discount * self.getValue(nextState) - self.getQValue(state, action))
     
 
 class PacmanQAgent(QLearningAgent):
@@ -166,8 +166,8 @@ class ApproximateQAgent(PacmanQAgent):
     self.featExtractor = util.lookup(extractor, globals())()
     PacmanQAgent.__init__(self, **args)
 
-    # You might want to initialize weights here.
     "*** YOUR CODE HERE ***"
+    self.W = util.Counter()
 
   def getQValue(self, state, action):
     """
@@ -175,15 +175,23 @@ class ApproximateQAgent(PacmanQAgent):
       where * is the dotProduct operator
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    features = self.featExtractor.getFeatures(state, action)
+    Q = 0
+    for f, v in features.items():
+        Q += self.W[f] * v
+        
+    return Q
 
   def update(self, state, action, nextState, reward):
     """
        Should update your weights based on transition
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
+    correction = (reward + self.discount * self.getValue(nextState) - self.getQValue(state, action))
+    features = self.featExtractor.getFeatures(state, action)
+    for f, v in features.items():
+        self.W[f] += self.alpha * correction * v
+    
   def final(self, state):
     "Called at the end of each game."
     # call the super-class final method
