@@ -1,0 +1,23 @@
++ Know complexities of search algos.
++ Iterative deepening reduces memory cost
++ Reflex agent simply maps states to actions
++ Solutions transforms start state to goal state
++ Put all key algos. in cheat sheet
++ CSPs use tree search because duplicate states will never arise
+	because we branch on one variable at each state
++ MRV is fail fast
++ Once we choose a variable to assign, choose the least constraining value
+	more likely to succeed than others
++ For each value in the tail, is the value at head consistent with tail value?
+	if not, cross it out
++ Arc consistency is for detecting failure earlier
++ Solution to a game is a strategy:
+	for every possible state, what is the best move to make?
++ With finite horizons in MDP, optimal action in a certain state could depend on time
+	not true with infinite horizons
++ RL: T, R, unknown
++ Exponential moving average biases recent samples
++ Learning rate?
++ Know probability
++ Variable elimination not on MT
++ Know representation of Bayes Nets
