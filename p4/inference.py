@@ -129,7 +129,7 @@ class ExactInference(InferenceModule):
         # Replace this code with a correct observation update
         # Be sure to handle the jail.
         if noisyDistance is None: # ghost is  captured
-            self.beliefs = Counter()
+            self.beliefs = util.Counter()
             self.beliefs[self.getJailPosition()] = 1.0
         else:
             for p in self.legalPositions:
@@ -182,7 +182,13 @@ class ExactInference(InferenceModule):
         """
         
         "*** YOUR CODE HERE ***"
-
+        oldBeliefs = self.beliefs.copy()
+        self.beliefs = util.Counter()
+        for p in self.legalPositions:
+            newPosDist = self.getPositionDistribution(self.setGhostPosition(gameState, p))
+            for newP, pr in newPosDist.items():
+                self.beliefs[newP] += pr * oldBeliefs[p]
+                
     def getBeliefDistribution(self):
         return self.beliefs
 
