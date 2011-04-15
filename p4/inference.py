@@ -432,6 +432,8 @@ class JointParticleFilter:
                 
         "*** YOUR CODE HERE ***"
         def imprisonGhosts():
+            # For all of our particles,
+            # Set each captured ghost's position to its jail position
             newParticles = []
             for particle in self.particles:
                 newParticle = list(particle)
@@ -452,14 +454,14 @@ class JointParticleFilter:
                 if not captured[i]:
                     trueDistance = util.manhattanDistance(particle[i], pacmanPosition)
                     weight *= emissionModels[i][trueDistance]
-            distribution[particle] = weight
+            distribution[particle] += weight
         
         # Reinitialize if all weights are 0
         if distribution.totalCount() == 0:
             self.initializeParticles()
             imprisonGhosts()
         else:
-            # Resample
+            # Resample particles based on our weight distribution
             newParticles = []
             for particle in self.particles:
                 newParticle = list(util.sample(distribution))
