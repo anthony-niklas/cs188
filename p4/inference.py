@@ -244,7 +244,7 @@ class ParticleFilter(InferenceModule):
         "*** YOUR CODE HERE ***"        
         if noisyDistance is None: # ghost is  captured
             jail = self.getJailPosition()
-            self.particles = [jail for n in range(300)]
+            self.particles = [jail for n in range(self.numParticles)]
         else:
             for i, particle in enumerate(self.particles):
                 trueDistance = util.manhattanDistance(particle, pacmanPosition)
@@ -333,7 +333,9 @@ class JointParticleFilter:
     def initializeParticles(self):
         "Initializes particles randomly.    Each particle is a tuple of ghost positions. Use self.numParticles for the number of particles"
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        self.particles = []
+        for n in range(self.numParticles):
+            self.particles.append(tuple([random.choice(self.legalPositions) for n in range(self.numGhosts)]))
 
     def addGhostAgent(self, agent):
         "Each ghost agent is registered separately and stored (in case they are different)."
@@ -381,8 +383,12 @@ class JointParticleFilter:
         """
         newParticles = []
         for oldParticle in self.particles:
-            newParticle = list(oldParticle) # A list of ghost positions
+            newParticle = [] # A list of ghost positions
             "*** YOUR CODE HERE ***"
+            for i in range(self.numGhosts):
+                newPosDist = getPositionDistributionForGhost(setGhostPositions(gameState, oldParticle), i, self.ghostAgents[i])
+                newParticle.append(util.sample(newPosDist))
+                            
             newParticles.append(tuple(newParticle))
         self.particles = newParticles
 
@@ -411,14 +417,56 @@ class JointParticleFilter:
             2) When all particles receive 0 weight, they should be recreated from the
                     prior distribution by calling initializeParticles. Remember to
                     change ghosts' positions to jail if called for.
+                    
         """ 
         pacmanPosition = gameState.getPacmanPosition()
         noisyDistances = gameState.getNoisyGhostDistances()
         if len(noisyDistances) < self.numGhosts: return
         emissionModels = [busters.getObservationDistribution(dist) for dist in noisyDistances]
 
+        # Mark any ghosts as captured
+        captured = [False for n in range(self.numGhosts)]
+        for i, dist in enumerate(noisyDistances):
+            if dist is None:
+                captured[i] = True
+                
         "*** YOUR CODE HERE ***"
-    
+        def imprisonGhosts():
+            newParticles = []
+            for particle in self.particles:
+                newParticle = list(particle)
+                for i in range(self.numGhosts):
+                    if captured[i]:
+                        newParticle[i] = self.getJailPosition(i)
+                newParticles.append(tuple(newParticle))
+            self.particles = newParticles
+
+        # Imprison ghosts before weighting
+        imprisonGhosts()
+        
+        # Weight particles
+        distribution = util.Counter()
+        for particle in self.particles:
+            weight = 1.0
+            for i in range(self.numGhosts):
+                if not captured[i]:
+                    trueDistance = util.manhattanDistance(particle[i], pacmanPosition)
+                    weight *= emissionModels[i][trueDistance]
+            distribution[particle] = weight
+        
+        # Reinitialize if all weights are 0
+        if distribution.totalCount() == 0:
+            self.initializeParticles()
+            imprisonGhosts()
+        else:
+            # Resample
+            newParticles = []
+            for particle in self.particles:
+                newParticle = list(util.sample(distribution))
+                newParticles.append(tuple(newParticle))
+            self.particles = newParticles
+        
+        
     def getBeliefDistribution(self):
         dist = util.Counter()
         for part in self.particles: dist[part] += 1
