@@ -284,7 +284,7 @@ class ParticleFilter(InferenceModule):
         beliefs = util.Counter()
         weights = util.Counter()
         for i, p in enumerate(self.particles):
-            beliefs[p] += 1 * self.weights[i]
+            beliefs[p] += self.weights[i]
             
         beliefs.normalize()
         
