@@ -89,7 +89,7 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
             for f in self.features:
                 conditionals[f] = {0: util.Counter(), 1: util.Counter()}
                 
-            # Normalize everything
+            # Run Laplace smoothing
             for f in self.features:
                 for value in [0, 1]:
                     for y in self.legalLabels:
