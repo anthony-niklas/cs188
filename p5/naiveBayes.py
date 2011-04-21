@@ -147,14 +147,19 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
     def findHighOddsFeatures(self, label1, label2):
         """
         Returns the 100 best features for the odds ratio:
-                        P(feature=1 | label1)/P(feature=1 | label2) 
+                        P(feature = 1 | label1) / P(feature = 1 | label2) 
         
         Note: you may find 'self.features' a useful way to loop through all possible features
         """
+        "*** YOUR CODE HERE ***"        
         featuresOdds = []
-             
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        for f in self.features:
+            top = self.conditionals[f][1][label1]
+            bottom = self.conditionals[f][1][label2]
+            ratio = top / bottom
+            featuresOdds.append((f, ratio))
+            
+        featuresOdds = [f for f, odds in sorted(featuresOdds, key=lambda t: -t[1])[:100]]
 
         return featuresOdds
         
