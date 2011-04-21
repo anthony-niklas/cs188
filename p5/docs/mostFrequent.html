@@ -1,0 +1,47 @@
+<html>
+  <head>
+  <title>mostFrequent.py</title>
+  </head>
+  <body>
+  <h3>mostFrequent.py (<a href="../mostFrequent.py">original</a>)</h3>
+  <hr>
+  <pre>
+<span style="color: green; font-style: italic"># mostFrequent.py
+# ---------------
+# Licensing Information: Please do not distribute or publish solutions to this
+# project. You are free to use and extend these projects for educational
+# purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
+# John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+
+</span><span style="color: blue; font-weight: bold">import </span>util
+<span style="color: blue; font-weight: bold">import </span>classificationMethod
+
+<span style="color: blue; font-weight: bold">class </span>MostFrequentClassifier<span style="font-weight: bold">(</span>classificationMethod<span style="font-weight: bold">.</span>ClassificationMethod<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  The MostFrequentClassifier is a very simple classifier: for
+  every test instance presented to it, the classifier returns
+  the label that was seen most often in the training data.
+  """
+  </span><span style="color: blue; font-weight: bold">def </span>__init__<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>legalLabels<span style="font-weight: bold">):
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>guess <span style="font-weight: bold">= </span><span style="color: blue">None
+    self</span><span style="font-weight: bold">.</span>type <span style="font-weight: bold">= </span><span style="color: red">"mostfrequent"
+  
+  </span><span style="color: blue; font-weight: bold">def </span>train<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>data<span style="font-weight: bold">, </span>labels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Find the most common label in the training data.
+    """
+    </span>counter <span style="font-weight: bold">= </span>util<span style="font-weight: bold">.</span>Counter<span style="font-weight: bold">()
+    </span>counter<span style="font-weight: bold">.</span>incrementAll<span style="font-weight: bold">(</span>labels<span style="font-weight: bold">, </span><span style="color: red">1</span><span style="font-weight: bold">)
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>guess <span style="font-weight: bold">= </span>counter<span style="font-weight: bold">.</span>argMax<span style="font-weight: bold">()
+  
+  </span><span style="color: blue; font-weight: bold">def </span>classify<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>testData<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Classify all test data as the most common label.
+    """
+    </span><span style="color: blue; font-weight: bold">return </span><span style="font-weight: bold">[</span><span style="color: blue">self</span><span style="font-weight: bold">.</span>guess <span style="color: blue; font-weight: bold">for </span>i <span style="color: blue; font-weight: bold">in </span>testData<span style="font-weight: bold">]
+</span>
+  </pre>
+  </body>
+  </html>
+  

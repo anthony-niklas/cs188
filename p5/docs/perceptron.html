@@ -1,0 +1,93 @@
+<html>
+  <head>
+  <title>perceptron.py</title>
+  </head>
+  <body>
+  <h3>perceptron.py (<a href="../perceptron.py">original</a>)</h3>
+  <hr>
+  <pre>
+<span style="color: green; font-style: italic"># perceptron.py
+# -------------
+# Licensing Information: Please do not distribute or publish solutions to this
+# project. You are free to use and extend these projects for educational
+# purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
+# John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+
+# Perceptron implementation
+</span><span style="color: blue; font-weight: bold">import </span>util
+PRINT <span style="font-weight: bold">= </span><span style="color: blue; font-weight: bold">True
+
+class </span>PerceptronClassifier<span style="font-weight: bold">:
+  </span><span style="color: darkred">"""
+  Perceptron classifier.
+  
+  Note that the variable 'datum' in this code refers to a counter of features
+  (not to a raw samples.Datum).
+  """
+  </span><span style="color: blue; font-weight: bold">def </span>__init__<span style="font-weight: bold">( </span><span style="color: blue">self</span><span style="font-weight: bold">, </span>legalLabels<span style="font-weight: bold">, </span>max_iterations<span style="font-weight: bold">):
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>legalLabels <span style="font-weight: bold">= </span>legalLabels
+    <span style="color: blue">self</span><span style="font-weight: bold">.</span>type <span style="font-weight: bold">= </span><span style="color: red">"perceptron"
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>max_iterations <span style="font-weight: bold">= </span>max_iterations
+    <span style="color: blue">self</span><span style="font-weight: bold">.</span>weights <span style="font-weight: bold">= {}
+    </span><span style="color: blue; font-weight: bold">for </span>label <span style="color: blue; font-weight: bold">in </span>legalLabels<span style="font-weight: bold">:
+      </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>weights<span style="font-weight: bold">[</span>label<span style="font-weight: bold">] = </span>util<span style="font-weight: bold">.</span>Counter<span style="font-weight: bold">() </span><span style="color: green; font-style: italic"># this is the data-structure you should use
+
+  </span><span style="color: blue; font-weight: bold">def </span>setWeights<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>weights<span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">assert </span>len<span style="font-weight: bold">(</span>weights<span style="font-weight: bold">) == </span>len<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">.</span>legalLabels<span style="font-weight: bold">)</span>;
+    <span style="color: blue">self</span><span style="font-weight: bold">.</span>weights <span style="font-weight: bold">== </span>weights;
+      
+  <span style="color: blue; font-weight: bold">def </span>train<span style="font-weight: bold">( </span><span style="color: blue">self</span><span style="font-weight: bold">, </span>trainingData<span style="font-weight: bold">, </span>trainingLabels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels <span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    The training loop for the perceptron passes through the training data several
+    times and updates the weight vector for each label based on classification errors.
+    See the project description for details. 
+    
+    Use the provided self.weights[label] data structure so that 
+    the classify method works correctly. Also, recall that a
+    datum is a counter from features to values for those features
+    (and thus represents a vector a values).
+    """
+    
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>features <span style="font-weight: bold">= </span>trainingData<span style="font-weight: bold">[</span><span style="color: red">0</span><span style="font-weight: bold">].</span>keys<span style="font-weight: bold">() </span><span style="color: green; font-style: italic"># could be useful later
+    # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
+    # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
+    
+    </span><span style="color: blue; font-weight: bold">for </span>iteration <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">.</span>max_iterations<span style="font-weight: bold">):
+      </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Starting iteration "</span><span style="font-weight: bold">, </span>iteration<span style="font-weight: bold">, </span><span style="color: red">"..."
+      </span><span style="color: blue; font-weight: bold">for </span>i <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>len<span style="font-weight: bold">(</span>trainingData<span style="font-weight: bold">)):
+          </span><span style="color: red">"*** YOUR CODE HERE ***"
+          </span>util<span style="font-weight: bold">.</span>raiseNotDefined<span style="font-weight: bold">()
+    
+  </span><span style="color: blue; font-weight: bold">def </span>classify<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>data <span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Classifies each datum as the label that most closely matches the prototype vector
+    for that label.  See the project description for details.
+    
+    Recall that a datum is a util.counter... 
+    """
+    </span>guesses <span style="font-weight: bold">= []
+    </span><span style="color: blue; font-weight: bold">for </span>datum <span style="color: blue; font-weight: bold">in </span>data<span style="font-weight: bold">:
+      </span>vectors <span style="font-weight: bold">= </span>util<span style="font-weight: bold">.</span>Counter<span style="font-weight: bold">()
+      </span><span style="color: blue; font-weight: bold">for </span>l <span style="color: blue; font-weight: bold">in </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>legalLabels<span style="font-weight: bold">:
+        </span>vectors<span style="font-weight: bold">[</span>l<span style="font-weight: bold">] = </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>weights<span style="font-weight: bold">[</span>l<span style="font-weight: bold">] * </span>datum
+      guesses<span style="font-weight: bold">.</span>append<span style="font-weight: bold">(</span>vectors<span style="font-weight: bold">.</span>argMax<span style="font-weight: bold">())
+    </span><span style="color: blue; font-weight: bold">return </span>guesses
+
+  
+  <span style="color: blue; font-weight: bold">def </span>findHighWeightFeatures<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>label<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Returns a list of the 100 features with the greatest weight for some label
+    """
+    </span>featuresWeights <span style="font-weight: bold">= []
+
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+    </span>util<span style="font-weight: bold">.</span>raiseNotDefined<span style="font-weight: bold">()
+
+    </span><span style="color: blue; font-weight: bold">return </span>featuresWeights
+
+
+  </pre>
+  </body>
+  </html>
+  

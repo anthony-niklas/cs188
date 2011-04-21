@@ -1,0 +1,202 @@
+<html>
+  <head>
+  <title>samples.py</title>
+  </head>
+  <body>
+  <h3>samples.py (<a href="../samples.py">original</a>)</h3>
+  <hr>
+  <pre>
+<span style="color: green; font-style: italic"># samples.py
+# ----------
+# Licensing Information: Please do not distribute or publish solutions to this
+# project. You are free to use and extend these projects for educational
+# purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
+# John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+
+</span><span style="color: blue; font-weight: bold">import </span>util
+
+<span style="color: green; font-style: italic">## Constants
+</span>DATUM_WIDTH <span style="font-weight: bold">= </span><span style="color: red">0 </span><span style="color: green; font-style: italic"># in pixels
+</span>DATUM_HEIGHT <span style="font-weight: bold">= </span><span style="color: red">0 </span><span style="color: green; font-style: italic"># in pixels
+
+## Module Classes
+
+</span><span style="color: blue; font-weight: bold">class </span>Datum<span style="font-weight: bold">:
+  </span><span style="color: darkred">"""
+  A datum is a pixel-level encoding of digits or face/non-face edge maps.
+
+  Digits are from the MNIST dataset and face images are from the 
+  easy-faces and background categories of the Caltech 101 dataset.
+  
+  
+  Each digit is 28x28 pixels, and each face/non-face image is 60x74 
+  pixels, each pixel can take the following values:
+    0: no edge (blank)
+    1: gray pixel (+) [used for digits only]
+    2: edge [for face] or black pixel [for digit] (#)
+    
+  Pixel data is stored in the 2-dimensional array pixels, which
+  maps to pixels on a plane according to standard euclidean axes
+  with the first dimension denoting the horizontal and the second
+  the vertical coordinate:
+    
+    28 # # # #      #  #
+    27 # # # #      #  #
+     .
+     .
+     .
+     3 # # + #      #  #
+     2 # # # #      #  #
+     1 # # # #      #  #
+     0 # # # #      #  #
+       0 1 2 3 ... 27 28
+   
+  For example, the + in the above diagram is stored in pixels[2][3], or
+  more generally pixels[column][row].
+       
+  The contents of the representation can be accessed directly
+  via the getPixel and getPixels methods.
+  """
+  </span><span style="color: blue; font-weight: bold">def </span>__init__<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>data<span style="font-weight: bold">,</span>width<span style="font-weight: bold">,</span>height<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Create a new datum from file input (standard MNIST encoding).
+    """
+    </span>DATUM_HEIGHT <span style="font-weight: bold">= </span>height
+    DATUM_WIDTH<span style="font-weight: bold">=</span>width
+    <span style="color: blue">self</span><span style="font-weight: bold">.</span>height <span style="font-weight: bold">= </span>DATUM_HEIGHT
+    <span style="color: blue">self</span><span style="font-weight: bold">.</span>width <span style="font-weight: bold">= </span>DATUM_WIDTH
+    <span style="color: blue; font-weight: bold">if </span>data <span style="font-weight: bold">== </span><span style="color: blue">None</span><span style="font-weight: bold">:
+      </span>data <span style="font-weight: bold">= [[</span><span style="color: red">' ' </span><span style="color: blue; font-weight: bold">for </span>i <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>DATUM_WIDTH<span style="font-weight: bold">)] </span><span style="color: blue; font-weight: bold">for </span>j <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>DATUM_HEIGHT<span style="font-weight: bold">)] 
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>pixels <span style="font-weight: bold">= </span>util<span style="font-weight: bold">.</span>arrayInvert<span style="font-weight: bold">(</span>convertToInteger<span style="font-weight: bold">(</span>data<span style="font-weight: bold">)) 
+    
+  </span><span style="color: blue; font-weight: bold">def </span>getPixel<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>column<span style="font-weight: bold">, </span>row<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Returns the value of the pixel at column, row as 0, or 1.
+    """
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>pixels<span style="font-weight: bold">[</span>column<span style="font-weight: bold">][</span>row<span style="font-weight: bold">]
+      
+  </span><span style="color: blue; font-weight: bold">def </span>getPixels<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Returns all pixels as a list of lists.
+    """
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>pixels    
+      
+  <span style="color: blue; font-weight: bold">def </span>getAsciiString<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Renders the data item as an ascii image.
+    """
+    </span>rows <span style="font-weight: bold">= []
+    </span>data <span style="font-weight: bold">= </span>util<span style="font-weight: bold">.</span>arrayInvert<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">.</span>pixels<span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">for </span>row <span style="color: blue; font-weight: bold">in </span>data<span style="font-weight: bold">:
+      </span>ascii <span style="font-weight: bold">= </span>map<span style="font-weight: bold">(</span>asciiGrayscaleConversionFunction<span style="font-weight: bold">, </span>row<span style="font-weight: bold">)
+      </span>rows<span style="font-weight: bold">.</span>append<span style="font-weight: bold">( </span><span style="color: red">""</span><span style="font-weight: bold">.</span>join<span style="font-weight: bold">(</span>ascii<span style="font-weight: bold">) )
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: red">"\n"</span><span style="font-weight: bold">.</span>join<span style="font-weight: bold">(</span>rows<span style="font-weight: bold">)
+    
+  </span><span style="color: blue; font-weight: bold">def </span>__str__<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>getAsciiString<span style="font-weight: bold">()
+    
+
+
+</span><span style="color: green; font-style: italic"># Data processing, cleanup and display functions
+    
+</span><span style="color: blue; font-weight: bold">def </span>loadDataFile<span style="font-weight: bold">(</span>filename<span style="font-weight: bold">, </span>n<span style="font-weight: bold">,</span>width<span style="font-weight: bold">,</span>height<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  Reads n data images from a file and returns a list of Datum objects.
+  
+  (Return less then n items if the end of file is encountered).
+  """
+  </span>DATUM_WIDTH<span style="font-weight: bold">=</span>width
+  DATUM_HEIGHT<span style="font-weight: bold">=</span>height
+  fin <span style="font-weight: bold">= </span>readlines<span style="font-weight: bold">(</span>filename<span style="font-weight: bold">)
+  </span>fin<span style="font-weight: bold">.</span>reverse<span style="font-weight: bold">()
+  </span>items <span style="font-weight: bold">= []
+  </span><span style="color: blue; font-weight: bold">for </span>i <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>n<span style="font-weight: bold">):
+    </span>data <span style="font-weight: bold">= []
+    </span><span style="color: blue; font-weight: bold">for </span>j <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>height<span style="font-weight: bold">):
+      </span>data<span style="font-weight: bold">.</span>append<span style="font-weight: bold">(</span>list<span style="font-weight: bold">(</span>fin<span style="font-weight: bold">.</span>pop<span style="font-weight: bold">()))
+    </span><span style="color: blue; font-weight: bold">if </span>len<span style="font-weight: bold">(</span>data<span style="font-weight: bold">[</span><span style="color: red">0</span><span style="font-weight: bold">]) &lt; </span>DATUM_WIDTH<span style="font-weight: bold">-</span><span style="color: red">1</span><span style="font-weight: bold">:
+      </span><span style="color: green; font-style: italic"># we encountered end of file...
+      </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Truncating at %d examples (maximum)" </span><span style="font-weight: bold">% </span>i
+      <span style="color: blue; font-weight: bold">break
+    </span>items<span style="font-weight: bold">.</span>append<span style="font-weight: bold">(</span>Datum<span style="font-weight: bold">(</span>data<span style="font-weight: bold">,</span>DATUM_WIDTH<span style="font-weight: bold">,</span>DATUM_HEIGHT<span style="font-weight: bold">))
+  </span><span style="color: blue; font-weight: bold">return </span>items
+
+<span style="color: blue; font-weight: bold">import </span>zipfile
+<span style="color: blue; font-weight: bold">import </span>os
+<span style="color: blue; font-weight: bold">def </span>readlines<span style="font-weight: bold">(</span>filename<span style="font-weight: bold">):
+  </span><span style="color: red">"Opens a file or reads it from the zip archive data.zip"
+  </span><span style="color: blue; font-weight: bold">if</span><span style="font-weight: bold">(</span>os<span style="font-weight: bold">.</span>path<span style="font-weight: bold">.</span>exists<span style="font-weight: bold">(</span>filename<span style="font-weight: bold">)): 
+    </span><span style="color: blue; font-weight: bold">return </span><span style="font-weight: bold">[</span>l<span style="font-weight: bold">[:-</span><span style="color: red">1</span><span style="font-weight: bold">] </span><span style="color: blue; font-weight: bold">for </span>l <span style="color: blue; font-weight: bold">in </span>open<span style="font-weight: bold">(</span>filename<span style="font-weight: bold">).</span>readlines<span style="font-weight: bold">()]
+  </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">: 
+    </span>z <span style="font-weight: bold">= </span>zipfile<span style="font-weight: bold">.</span>ZipFile<span style="font-weight: bold">(</span><span style="color: red">'data.zip'</span><span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">return </span>z<span style="font-weight: bold">.</span>read<span style="font-weight: bold">(</span>filename<span style="font-weight: bold">).</span>split<span style="font-weight: bold">(</span><span style="color: red">'\n'</span><span style="font-weight: bold">)
+    
+</span><span style="color: blue; font-weight: bold">def </span>loadLabelsFile<span style="font-weight: bold">(</span>filename<span style="font-weight: bold">, </span>n<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  Reads n labels from a file and returns a list of integers.
+  """
+  </span>fin <span style="font-weight: bold">= </span>readlines<span style="font-weight: bold">(</span>filename<span style="font-weight: bold">)
+  </span>labels <span style="font-weight: bold">= []
+  </span><span style="color: blue; font-weight: bold">for </span>line <span style="color: blue; font-weight: bold">in </span>fin<span style="font-weight: bold">[:</span>min<span style="font-weight: bold">(</span>n<span style="font-weight: bold">, </span>len<span style="font-weight: bold">(</span>fin<span style="font-weight: bold">))]:
+    </span><span style="color: blue; font-weight: bold">if </span>line <span style="font-weight: bold">== </span><span style="color: red">''</span><span style="font-weight: bold">:
+        </span><span style="color: blue; font-weight: bold">break
+    </span>labels<span style="font-weight: bold">.</span>append<span style="font-weight: bold">(</span>int<span style="font-weight: bold">(</span>line<span style="font-weight: bold">))
+  </span><span style="color: blue; font-weight: bold">return </span>labels
+  
+<span style="color: blue; font-weight: bold">def </span>asciiGrayscaleConversionFunction<span style="font-weight: bold">(</span>value<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  Helper function for display purposes.
+  """
+  </span><span style="color: blue; font-weight: bold">if</span><span style="font-weight: bold">(</span>value <span style="font-weight: bold">== </span><span style="color: red">0</span><span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: red">' '
+  </span><span style="color: blue; font-weight: bold">elif</span><span style="font-weight: bold">(</span>value <span style="font-weight: bold">== </span><span style="color: red">1</span><span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: red">'+'
+  </span><span style="color: blue; font-weight: bold">elif</span><span style="font-weight: bold">(</span>value <span style="font-weight: bold">== </span><span style="color: red">2</span><span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: red">'#'    
+    
+</span><span style="color: blue; font-weight: bold">def </span>IntegerConversionFunction<span style="font-weight: bold">(</span>character<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  Helper function for file reading.
+  """
+  </span><span style="color: blue; font-weight: bold">if</span><span style="font-weight: bold">(</span>character <span style="font-weight: bold">== </span><span style="color: red">' '</span><span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: red">0
+  </span><span style="color: blue; font-weight: bold">elif</span><span style="font-weight: bold">(</span>character <span style="font-weight: bold">== </span><span style="color: red">'+'</span><span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: red">1
+  </span><span style="color: blue; font-weight: bold">elif</span><span style="font-weight: bold">(</span>character <span style="font-weight: bold">== </span><span style="color: red">'#'</span><span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: red">2    
+
+</span><span style="color: blue; font-weight: bold">def </span>convertToInteger<span style="font-weight: bold">(</span>data<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  Helper function for file reading.
+  """
+  </span><span style="color: blue; font-weight: bold">if </span>type<span style="font-weight: bold">(</span>data<span style="font-weight: bold">) != </span>type<span style="font-weight: bold">([]):
+    </span><span style="color: blue; font-weight: bold">return </span>IntegerConversionFunction<span style="font-weight: bold">(</span>data<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+    </span><span style="color: blue; font-weight: bold">return </span>map<span style="font-weight: bold">(</span>convertToInteger<span style="font-weight: bold">, </span>data<span style="font-weight: bold">)
+
+</span><span style="color: green; font-style: italic"># Testing
+
+</span><span style="color: blue; font-weight: bold">def </span>_test<span style="font-weight: bold">():
+  </span><span style="color: blue; font-weight: bold">import </span>doctest
+  doctest<span style="font-weight: bold">.</span>testmod<span style="font-weight: bold">() </span><span style="color: green; font-style: italic"># Test the interactive sessions in function comments
+  </span>n <span style="font-weight: bold">= </span><span style="color: red">1
+</span><span style="color: green; font-style: italic">#  items = loadDataFile("facedata/facedatatrain", n,60,70)
+#  labels = loadLabelsFile("facedata/facedatatrainlabels", n)
+  </span>items <span style="font-weight: bold">= </span>loadDataFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/trainingimages"</span><span style="font-weight: bold">, </span>n<span style="font-weight: bold">,</span><span style="color: red">28</span><span style="font-weight: bold">,</span><span style="color: red">28</span><span style="font-weight: bold">)
+  </span>labels <span style="font-weight: bold">= </span>loadLabelsFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/traininglabels"</span><span style="font-weight: bold">, </span>n<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">for </span>i <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span><span style="color: red">1</span><span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">print </span>items<span style="font-weight: bold">[</span>i<span style="font-weight: bold">]
+    </span><span style="color: blue; font-weight: bold">print </span>items<span style="font-weight: bold">[</span>i<span style="font-weight: bold">]
+    </span><span style="color: blue; font-weight: bold">print </span><span style="font-weight: bold">(</span>items<span style="font-weight: bold">[</span>i<span style="font-weight: bold">].</span>height<span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">print </span><span style="font-weight: bold">(</span>items<span style="font-weight: bold">[</span>i<span style="font-weight: bold">].</span>width<span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">print </span>dir<span style="font-weight: bold">(</span>items<span style="font-weight: bold">[</span>i<span style="font-weight: bold">])
+    </span><span style="color: blue; font-weight: bold">print </span>items<span style="font-weight: bold">[</span>i<span style="font-weight: bold">].</span>getPixels<span style="font-weight: bold">()
+
+</span><span style="color: blue; font-weight: bold">if </span>__name__ <span style="font-weight: bold">== </span><span style="color: red">"__main__"</span><span style="font-weight: bold">:
+  </span>_test<span style="font-weight: bold">()  
+</span>
+  </pre>
+  </body>
+  </html>
+  

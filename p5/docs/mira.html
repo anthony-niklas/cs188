@@ -1,0 +1,100 @@
+<html>
+  <head>
+  <title>mira.py</title>
+  </head>
+  <body>
+  <h3>mira.py (<a href="../mira.py">original</a>)</h3>
+  <hr>
+  <pre>
+<span style="color: green; font-style: italic"># mira.py
+# -------
+# Licensing Information: Please do not distribute or publish solutions to this
+# project. You are free to use and extend these projects for educational
+# purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
+# John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+
+# Mira implementation
+</span><span style="color: blue; font-weight: bold">import </span>util
+PRINT <span style="font-weight: bold">= </span><span style="color: blue; font-weight: bold">True
+
+class </span>MiraClassifier<span style="font-weight: bold">:
+  </span><span style="color: darkred">"""
+  Mira classifier.
+  
+  Note that the variable 'datum' in this code refers to a counter of features
+  (not to a raw samples.Datum).
+  """
+  </span><span style="color: blue; font-weight: bold">def </span>__init__<span style="font-weight: bold">( </span><span style="color: blue">self</span><span style="font-weight: bold">, </span>legalLabels<span style="font-weight: bold">, </span>max_iterations<span style="font-weight: bold">):
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>legalLabels <span style="font-weight: bold">= </span>legalLabels
+    <span style="color: blue">self</span><span style="font-weight: bold">.</span>type <span style="font-weight: bold">= </span><span style="color: red">"mira"
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>automaticTuning <span style="font-weight: bold">= </span><span style="color: blue; font-weight: bold">False 
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>C <span style="font-weight: bold">= </span><span style="color: red">0.001
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>legalLabels <span style="font-weight: bold">= </span>legalLabels
+    <span style="color: blue">self</span><span style="font-weight: bold">.</span>max_iterations <span style="font-weight: bold">= </span>max_iterations
+    <span style="color: blue">self</span><span style="font-weight: bold">.</span>initializeWeightsToZero<span style="font-weight: bold">()
+
+  </span><span style="color: blue; font-weight: bold">def </span>initializeWeightsToZero<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">):
+    </span><span style="color: red">"Resets the weights of each label to zero vectors" 
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>weights <span style="font-weight: bold">= {}
+    </span><span style="color: blue; font-weight: bold">for </span>label <span style="color: blue; font-weight: bold">in </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>legalLabels<span style="font-weight: bold">:
+      </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>weights<span style="font-weight: bold">[</span>label<span style="font-weight: bold">] = </span>util<span style="font-weight: bold">.</span>Counter<span style="font-weight: bold">() </span><span style="color: green; font-style: italic"># this is the data-structure you should use
+  
+  </span><span style="color: blue; font-weight: bold">def </span>train<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>trainingData<span style="font-weight: bold">, </span>trainingLabels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels<span style="font-weight: bold">):
+    </span><span style="color: red">"Outside shell to call your method. Do not modify this method."  
+      
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>features <span style="font-weight: bold">= </span>trainingData<span style="font-weight: bold">[</span><span style="color: red">0</span><span style="font-weight: bold">].</span>keys<span style="font-weight: bold">() </span><span style="color: green; font-style: italic"># this could be useful for your code later...
+    
+    </span><span style="color: blue; font-weight: bold">if </span><span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">.</span>automaticTuning<span style="font-weight: bold">):
+        </span>Cgrid <span style="font-weight: bold">= [</span><span style="color: red">0.002</span><span style="font-weight: bold">, </span><span style="color: red">0.004</span><span style="font-weight: bold">, </span><span style="color: red">0.008</span><span style="font-weight: bold">]
+    </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+        </span>Cgrid <span style="font-weight: bold">= [</span><span style="color: blue">self</span><span style="font-weight: bold">.</span>C<span style="font-weight: bold">]
+        
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>trainAndTune<span style="font-weight: bold">(</span>trainingData<span style="font-weight: bold">, </span>trainingLabels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels<span style="font-weight: bold">, </span>Cgrid<span style="font-weight: bold">)
+
+  </span><span style="color: blue; font-weight: bold">def </span>trainAndTune<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>trainingData<span style="font-weight: bold">, </span>trainingLabels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels<span style="font-weight: bold">, </span>Cgrid<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    This method sets self.weights using MIRA.  Train the classifier for each value of C in Cgrid, 
+    then store the weights that give the best accuracy on the validationData.
+    
+    Use the provided self.weights[label] data structure so that 
+    the classify method works correctly. Also, recall that a
+    datum is a counter from features to values for those features
+    representing a vector of values.
+    """
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+    </span>util<span style="font-weight: bold">.</span>raiseNotDefined<span style="font-weight: bold">()
+
+  </span><span style="color: blue; font-weight: bold">def </span>classify<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>data <span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Classifies each datum as the label that most closely matches the prototype vector
+    for that label.  See the project description for details.
+    
+    Recall that a datum is a util.counter... 
+    """
+    </span>guesses <span style="font-weight: bold">= []
+    </span><span style="color: blue; font-weight: bold">for </span>datum <span style="color: blue; font-weight: bold">in </span>data<span style="font-weight: bold">:
+      </span>vectors <span style="font-weight: bold">= </span>util<span style="font-weight: bold">.</span>Counter<span style="font-weight: bold">()
+      </span><span style="color: blue; font-weight: bold">for </span>l <span style="color: blue; font-weight: bold">in </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>legalLabels<span style="font-weight: bold">:
+        </span>vectors<span style="font-weight: bold">[</span>l<span style="font-weight: bold">] = </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>weights<span style="font-weight: bold">[</span>l<span style="font-weight: bold">] * </span>datum
+      guesses<span style="font-weight: bold">.</span>append<span style="font-weight: bold">(</span>vectors<span style="font-weight: bold">.</span>argMax<span style="font-weight: bold">())
+    </span><span style="color: blue; font-weight: bold">return </span>guesses
+
+  
+  <span style="color: blue; font-weight: bold">def </span>findHighOddsFeatures<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>label1<span style="font-weight: bold">, </span>label2<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Returns a list of the 100 features with the greatest difference in feature values
+                     w_label1 - w_label2
+
+    """
+    </span>featuresOdds <span style="font-weight: bold">= []
+
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+
+    </span><span style="color: blue; font-weight: bold">return </span>featuresOdds
+
+
+  </pre>
+  </body>
+  </html>
+  

@@ -1,0 +1,125 @@
+<html>
+  <head>
+  <title>naiveBayes.py</title>
+  </head>
+  <body>
+  <h3>naiveBayes.py (<a href="../naiveBayes.py">original</a>)</h3>
+  <hr>
+  <pre>
+<span style="color: green; font-style: italic"># naiveBayes.py
+# -------------
+# Licensing Information: Please do not distribute or publish solutions to this
+# project. You are free to use and extend these projects for educational
+# purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
+# John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+
+</span><span style="color: blue; font-weight: bold">import </span>util
+<span style="color: blue; font-weight: bold">import </span>classificationMethod
+<span style="color: blue; font-weight: bold">import </span>math
+
+<span style="color: blue; font-weight: bold">class </span>NaiveBayesClassifier<span style="font-weight: bold">(</span>classificationMethod<span style="font-weight: bold">.</span>ClassificationMethod<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  See the project description for the specifications of the Naive Bayes classifier.
+  
+  Note that the variable 'datum' in this code refers to a counter of features
+  (not to a raw samples.Datum).
+  """
+  </span><span style="color: blue; font-weight: bold">def </span>__init__<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>legalLabels<span style="font-weight: bold">):
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>legalLabels <span style="font-weight: bold">= </span>legalLabels
+    <span style="color: blue">self</span><span style="font-weight: bold">.</span>type <span style="font-weight: bold">= </span><span style="color: red">"naivebayes"
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>k <span style="font-weight: bold">= </span><span style="color: red">1 </span><span style="color: green; font-style: italic"># this is the smoothing parameter, ** use it in your train method **
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>automaticTuning <span style="font-weight: bold">= </span><span style="color: blue; font-weight: bold">False </span><span style="color: green; font-style: italic"># Look at this flag to decide whether to choose k automatically ** use this in your train method **
+    
+  </span><span style="color: blue; font-weight: bold">def </span>setSmoothing<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>k<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    This is used by the main method to change the smoothing parameter before training.
+    Do not modify this method.
+    """
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>k <span style="font-weight: bold">= </span>k
+
+  <span style="color: blue; font-weight: bold">def </span>train<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>trainingData<span style="font-weight: bold">, </span>trainingLabels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Outside shell to call your method. Do not modify this method.
+    """  
+      
+    </span><span style="color: green; font-style: italic"># might be useful in your code later...
+    # this is a list of all features in the training set.
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>features <span style="font-weight: bold">= </span>list<span style="font-weight: bold">(</span>set<span style="font-weight: bold">([ </span>f <span style="color: blue; font-weight: bold">for </span>datum <span style="color: blue; font-weight: bold">in </span>trainingData <span style="color: blue; font-weight: bold">for </span>f <span style="color: blue; font-weight: bold">in </span>datum<span style="font-weight: bold">.</span>keys<span style="font-weight: bold">() ]))</span>;
+    
+    <span style="color: blue; font-weight: bold">if </span><span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">.</span>automaticTuning<span style="font-weight: bold">):
+        </span>kgrid <span style="font-weight: bold">= [</span><span style="color: red">0.001</span><span style="font-weight: bold">, </span><span style="color: red">0.01</span><span style="font-weight: bold">, </span><span style="color: red">0.05</span><span style="font-weight: bold">, </span><span style="color: red">0.1</span><span style="font-weight: bold">, </span><span style="color: red">0.5</span><span style="font-weight: bold">, </span><span style="color: red">1</span><span style="font-weight: bold">, </span><span style="color: red">5</span><span style="font-weight: bold">, </span><span style="color: red">10</span><span style="font-weight: bold">, </span><span style="color: red">20</span><span style="font-weight: bold">, </span><span style="color: red">50</span><span style="font-weight: bold">]
+    </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+        </span>kgrid <span style="font-weight: bold">= [</span><span style="color: blue">self</span><span style="font-weight: bold">.</span>k<span style="font-weight: bold">]
+        
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>trainAndTune<span style="font-weight: bold">(</span>trainingData<span style="font-weight: bold">, </span>trainingLabels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels<span style="font-weight: bold">, </span>kgrid<span style="font-weight: bold">)
+      
+  </span><span style="color: blue; font-weight: bold">def </span>trainAndTune<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>trainingData<span style="font-weight: bold">, </span>trainingLabels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels<span style="font-weight: bold">, </span>kgrid<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Trains the classifier by collecting counts over the training data, and
+    stores the Laplace smoothed estimates so that they can be used to classify.
+    Evaluate each value of k in kgrid to choose the smoothing parameter 
+    that gives the best accuracy on the held-out validationData.
+    
+    trainingData and validationData are lists of feature Counters.  The corresponding
+    label lists contain the correct label for each datum.
+    
+    To get the list of all possible features or labels, use self.features and 
+    self.legalLabels.
+    """
+
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+    </span>util<span style="font-weight: bold">.</span>raiseNotDefined<span style="font-weight: bold">()
+        
+  </span><span style="color: blue; font-weight: bold">def </span>classify<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>testData<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Classify the data based on the posterior distribution over labels.
+    
+    You shouldn't modify this method.
+    """
+    </span>guesses <span style="font-weight: bold">= []
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>posteriors <span style="font-weight: bold">= [] </span><span style="color: green; font-style: italic"># Log posteriors are stored for later data analysis (autograder).
+    </span><span style="color: blue; font-weight: bold">for </span>datum <span style="color: blue; font-weight: bold">in </span>testData<span style="font-weight: bold">:
+      </span>posterior <span style="font-weight: bold">= </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>calculateLogJointProbabilities<span style="font-weight: bold">(</span>datum<span style="font-weight: bold">)
+      </span>guesses<span style="font-weight: bold">.</span>append<span style="font-weight: bold">(</span>posterior<span style="font-weight: bold">.</span>argMax<span style="font-weight: bold">())
+      </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>posteriors<span style="font-weight: bold">.</span>append<span style="font-weight: bold">(</span>posterior<span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">return </span>guesses
+      
+  <span style="color: blue; font-weight: bold">def </span>calculateLogJointProbabilities<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>datum<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Returns the log-joint distribution over legal labels and the datum.
+    Each log-probability should be stored in the log-joint counter, e.g.    
+    logJoint[3] = &lt;Estimate of log( P(Label = 3, datum) )&gt;
+    
+    To get the list of all possible features or labels, use self.features and 
+    self.legalLabels.
+    """
+    </span>logJoint <span style="font-weight: bold">= </span>util<span style="font-weight: bold">.</span>Counter<span style="font-weight: bold">()
+    
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+    </span>util<span style="font-weight: bold">.</span>raiseNotDefined<span style="font-weight: bold">()
+    
+    </span><span style="color: blue; font-weight: bold">return </span>logJoint
+  
+  <span style="color: blue; font-weight: bold">def </span>findHighOddsFeatures<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>label1<span style="font-weight: bold">, </span>label2<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Returns the 100 best features for the odds ratio:
+            P(feature=1 | label1)/P(feature=1 | label2) 
+    
+    Note: you may find 'self.features' a useful way to loop through all possible features
+    """
+    </span>featuresOdds <span style="font-weight: bold">= []
+       
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+    </span>util<span style="font-weight: bold">.</span>raiseNotDefined<span style="font-weight: bold">()
+
+    </span><span style="color: blue; font-weight: bold">return </span>featuresOdds
+    
+
+    
+      
+
+  </pre>
+  </body>
+  </html>
+  

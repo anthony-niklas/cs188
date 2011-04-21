@@ -1,0 +1,803 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document"><title>Project 5: Classification</title>
+
+<link href="projects.css" rel="stylesheet" type="text/css"></head>
+
+<body>
+<h2>Project 5: Classification</h2>
+<table border="0" cellpadding="10">
+<tr>
+<td align=center>
+  <img src="images/img2.gif"> <br>
+  Which Digit?
+</td>
+<td></td>
+<td align=center>
+  <table border="0" cellpadding="4">
+  <tbody><tr>
+    <tr>
+      <td><img src="images/i1.jpg" width=60></td>
+      <td><img src="images/image_0056.jpg" width=60></td>
+      <td><img src="images/i2.jpg" width=60></td>
+      <td><img src="images/image_0067.jpg" width=60></td>
+      <td><img src="images/image_0332.jpg" width=60></td>
+    </tr>
+    <tr>
+      <td><img src="images/image_0128.jpg" width=60></td>
+      <td><img src="images/i3.jpg" width=60></td>
+      <td><img src="images/image_0193.jpg" width=60></td>
+      <td><img src="images/i4.jpg" width=60></td>
+      <td><img src="images/i5.jpg" width=60></td>
+    </tr>
+    <tr>
+      <td><img src="images/i6.jpg" width=60></td>
+      <td><img src="images/i7.jpg" width=60></td>
+      <td><img src="images/image_0196.jpg" width=60></td>
+      <td><img src="images/i8.jpg" width=60></td>
+      <td><img src="images/i9.jpg" width=60></td>
+    </tr>
+  </tbody></table>
+  Which are Faces?
+</td>
+</tr>
+</tbody></table>
+
+<br>
+<br>
+<em>Due 12/09 at 11:59pm</em>
+
+<h2>Introduction</h2>
+<p>In this project, you will design three classifiers: a naive Bayes classifier, a perceptron 
+classifier and a large-margin (MIRA) classifier. You will test your classifiers on two 
+image data sets: a set of scanned handwritten digit images and a set of face images 
+in which edges have already been detected. Even with simple features, your classifiers will 
+be able to do quite well on these tasks when given enough training data.
+
+
+<p>Optical character recognition (<a href="http://en.wikipedia.org/wiki/Optical_character_recognition">OCR</a>) 
+is the task of extracting text from image sources. The first
+data set on which you will run your classifiers is a collection of handwritten numerical digits (0-9). 
+This is a very commercially useful technology, similar to the technique used by the 
+US post office to route mail by zip codes. 
+There are systems that can perform with over 99% classification accuracy 
+(see <a href="http://yann.lecun.com/exdb/lenet/index.html">LeNet-5</a> for an example system in action).
+
+<p>Face detection is the task of localizing faces within video or still images.  The faces can be at any 
+location and vary in size. There are many applications for face detection, including human computer 
+interaction and surveillance. You will attempt a simplified face detection task in which your system is 
+presented with an image that has been pre-processed by an edge detection algorithm.  The task is 
+to determine whether the edge image is a face or not. There are several systems in use that perform 
+quite well at the face detection task. One good system is the 
+<a href="http://vasc.ri.cmu.edu/NNFaceDetector/">Face Detector</a> by Schneiderman and Kanade. 
+You can even try it out on your own photos in this <a href="http://demo.pittpatt.com/">demo</a>.
+
+<p>The code for this project includes the following files and data, available as a 
+<a href="classification.zip">zip file</a>.&nbsp;</p> 
+<table border="0" cellpadding="5">
+  <tbody>
+  <tr>
+      <td colspan="2"><h5>Data file</h5></td>
+  </tr>
+  <tr>
+    <td><a href="data.zip"><code>data.zip</code></a></td>
+    <td>Data file, including the digit and face data. </td>
+  </tr>
+  
+  <tr>
+      <td colspan="2"><h5>Files you will edit</h5></td>
+  </tr>
+  <tr>
+    <td><code><a href="docs/naiveBayes.html">naiveBayes.py</a></code></td>
+    <td>The location where you will write your naive Bayes classifier. </td>
+  </tr>
+  <tr>
+    <td><code><a href="docs/perceptron.html">perceptron.py</a></code></td>
+    <td>The location where you will write your perceptron classifier. </td>
+  </tr>
+  <tr>
+      <td><code><a href="docs/mira.html">mira.py</a></code></td>
+      <td>The location where you will write your MIRA classifier. </td>
+    </tr>
+  <tr>
+    <td><code><a href="docs/dataClassifier.html">dataClassifier.py</a></code></td>
+    <td>The wrapper code that will call your classifiers. You will also write your 
+    enhanced feature extractor here. You will also use this code to analyze the behavior of your
+      classifier. </td>
+  </tr>
+  <tr>
+    <td><code><a href="docs/miniContest.html">miniContest.py</a></code></td>
+    <td>If you decide to enter the miniContest, you will want to edit this file to put in your classifier. Entering
+    the minicontest is optional, but the file must be present in your submission.</td>
+  </tr>
+  <tr>
+    <td><code><a href="docs/answers.html">answers.py</a></code></td>
+    <td>Answers to Question 2 and Question 4 go here.</td>
+  </tr>
+
+  <tr>
+        <td colspan="2"><h5>Files you should read but NOT edit</h5></td>
+  </tr>
+  <tr>
+    <td><code><a href="docs/classificationMethod.html">classificationMethod.py</a></code></td>
+    <td>Abstract super class for the classifiers you will write. <br>(You <b>should</b> read this file carefully to see how the infrastructure is set up.)</td>
+  </tr>
+  <tr>
+    <td><code><a href="docs/samples.html">samples.py</a></code></td>
+    <td>I/O code to read in the classification data.  </td>
+  </tr>
+  <tr>
+    <td><code><a href="docs/util.html">util.py</a></code></td>
+    <td>Code defining some useful tools.  You may be familiar with some of these by now, and 
+    they will save you a lot of time.
+    </td> </tr>
+  <tr>
+    <td><code><a href="docs/mostFrequent.html">mostFrequent.py</a></code></td>
+    <td>A simple baseline classifier that just labels every instance as the most frequent class. </td>
+  </tr>
+    <tr>
+    <td><code><a href="docs/runMinicontest.html">runMinicontest.py</a></code></td>
+    <td>The command you will use to run the minicontest, if you decide to enter.</td>
+  </tr>
+
+</tbody></table>
+<p>
+</p><p><strong>What to submit:</strong> You will fill in portions of <code><a href="docs/naiveBayes.html">naiveBayes.py</a></code>,
+<code><a href="docs/perceptron.html">perceptron.py</a></code>, <code><a href="docs/mira.html">mira.py</a></code> and <code><a href="docs/dataClassifier.html">dataClassifier.py</a></code>
+(only) during the assignment, and submit them. If you do the minicontest, submit
+<code><a href="docs/minicontest.html">minicontest.py</a></code> as well.</p>
+
+<p><strong>Evaluation:</strong> Your code will be autograded for technical
+correctness. Please <em>do not</em> change the names of any provided functions
+or classes within the code, or you will wreak havoc on the autograder.
+</p>
+
+<p><strong>Academic Dishonesty:</strong> We will be checking your code against
+other submissions in the class for logical redundancy. If you copy someone
+else's code and submit it with minor changes, we will know. These cheat
+detectors are quite hard to fool, so please don't try. We trust you all to
+submit your own work only; please don't let us down. Instead, contact the course
+staff if you are having trouble.
+
+<h2>Getting Started</h2>
+<p> To try out the classification pipeline, run <code><a href="docs/dataClassifier.html">dataClassifier.py</a></code> 
+from the command line. This 
+will classify the digit data using the default classifier (<code>mostFrequent</code>) which blindly classifies every example
+with the most frequent label.
+
+<pre>python dataClassifier.py  </pre>
+
+<p>As usual, you can learn more about the possible command line options by running: 
+    
+<pre>python dataClassifier.py -h  </pre>
+
+<p> We have defined some simple features for you. 
+Later you will design some better features. Our simple feature set includes one feature for
+each pixel location, which can take values 0 or 1 (off or on). The features are encoded as 
+a <code>Counter</code> where keys are feature locations (represented as (column,row)) and 
+values are 0 or 1. The face recognition data set has value 1 only for those pixels identified 
+by a Canny edge detector.
+
+<p> Implementation Note: You'll find it easiest to hard-code the binary feature assumption. 
+If you do, make sure you don't include any non-binary features. Or, you can write your code
+more generally, to handle arbitrary feature values, though this will probably involve
+a preliminary pass through the training set to find all possible feature values (and you'll
+need an "unknown" option in case you encounter a value in the test data you never saw
+during training).
+
+<h2>Naive Bayes</h2>
+
+<p> A skeleton implementation of a naive Bayes classifier is provided for you in 
+<code><a href="docs/naiveBayes.html">naiveBayes.py</a></code>. 
+You will fill in the <code>trainAndTune</code> function, the 
+<code>calculateLogJointProbabilities</code> function and the 
+<code>findHighOddsFeatures</code> function.
+
+<h4>Theory</h4>
+
+<p>A naive Bayes classifier
+ models a joint distribution over a label <IMG
+ WIDTH="17" HEIGHT="14" ALIGN="BOTTOM" BORDER="0"
+ SRC="images/img1.png"
+ ALT="$Y$"> and a set of observed random variables, or <I>features</I>, 
+<IMG
+ HEIGHT="18" ALIGN="TOP" BORDER="0"
+ SRC="images/img2.png"
+ ALT="$\{F_1, F_2, \ldots F_n\}$">,
+ using the assumption that the full joint distribution can be factored as follows (features are conditionally independent given the label):
+ <BR><P></P>
+<DIV ALIGN="CENTER">
+<IMG
+ SRC="images/img3.png"
+ ALT="\begin{displaymath}
+P(F_1 \ldots F_n, Y) = P(Y) \prod_i P(F_i \vert Y)
+\end{displaymath}">
+</DIV>
+<BR CLEAR="ALL">
+<P></P>
+
+<P>
+To classify a datum, we can find the most probable label given the feature values for each pixel, using Bayes theorem:
+<P></P>
+<DIV ALIGN="CENTER">
+<IMG
+ SRC="images/img4_new.png"
+ ALT="\begin{eqnarray*}
+P(y \vert f_1, \ldots, f_m) &amp;=&amp; \frac{P(f_1, \ldots, f_m \...
+...
+&amp;=&amp; \textmd{arg max}_{y} P(y) \prod_{i = 1}^m P(f_i \vert y)
+\end{eqnarray*}"></DIV>
+<BR CLEAR="ALL"><P></P>
+
+<P>
+Because multiplying many probabilities together often results in underflow, we will instead compute <em><b>log
+probabilities</b></em> which have the same argmax:
+<P></P>
+<DIV ALIGN="CENTER">
+<IMG
+ SRC="images/img5.png"
+ ALT="\begin{eqnarray*}
+\textmd{arg max}_{y} log(P(y \vert f_1, \ldots, f_m) &amp;=&amp; \te...
+...{arg max}_{y} (log(P(y)) + \sum_{i = 1}^m log(P(f_i \vert y)))
+\end{eqnarray*}"></DIV>
+<BR CLEAR="ALL"><P></P>
+
+
+
+<p> To compute logarithms, use <code>math.log()</code>, a built-in Python function.
+
+<h4>Parameter Estimation</h4>
+Our naive Bayes model has several parameters to estimate.  One
+parameter is the <em><b>prior distribution</b></em> over labels (digits, or face/not-face),
+<IMG
+ WIDTH="42" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img6.png"
+ ALT="$P(Y)$">.
+
+<P>
+We can estimate <IMG
+ WIDTH="42" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img6.png"
+ ALT="$P(Y)$"> directly from the training data:
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<IMG
+ SRC="images/img7.png"
+ ALT="\begin{displaymath}
+\hat{P}(y) = \frac{c(y)}{n}
+\end{displaymath}">
+</DIV>
+<BR CLEAR="ALL">
+<P></P>
+where <IMG
+ WIDTH="32" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img8.png"
+ ALT="$c(y)$"> is the number of training instances with label y and
+n is the total number of training instances.
+
+<P>
+The other parameters to estimate are the <em><b>conditional probabilities</em></b> of
+our features given each label y: 
+<IMG
+ WIDTH="92" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img9.png"
+ ALT="$P(F_i \vert Y = y)$">. We do this for each
+possible feature value (<IMG
+ HEIGHT="18" ALIGN="TOP"
+ SRC="images/img10.png"
+ ALT="$f_i \in {0,1}$">).
+<P></P>
+<DIV ALIGN="CENTER">
+<A NAME="empirical"></A><IMG
+ SRC="images/img11.png"
+ ALT="\begin{eqnarray*}
+\hat{P}(F_i=f_i\vert Y=y) &amp;=&amp; \frac{c(f_i,y)}{\sum_{f_i}{c(f_i,y)}} \\
+\end{eqnarray*}"></DIV>
+<BR CLEAR="ALL"><P></P>
+where <IMG
+ WIDTH="52" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img12.png"
+ ALT="$c(f_i,y)$"> is the number of times pixel <IMG
+ WIDTH="20" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img13.png"
+ ALT="$F_i$"> took value <IMG
+ WIDTH="18" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img14.png"
+ ALT="$f_i$">
+in the training examples of label y.
+
+</p><h4>Smoothing</h4>
+Your current parameter estimates are <I>unsmoothed</I>, that is, you are
+using the empirical estimates for the parameters <IMG
+ WIDTH="55" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img15.png"
+ ALT="$P(f_i\vert y)$">.  These
+estimates are rarely adequate in real systems.  Minimally, we need to
+make sure that no parameter ever receives an estimate of zero, but
+good smoothing can boost accuracy quite a bit by reducing
+overfitting.
+
+<P>
+In this project, we use <em>Laplace smoothing</em>, which adds <em>k</em> counts to every possible observation value:
+<p>
+<DIV ALIGN="CENTER">    
+<IMG
+ SRC="images/imgsmoothlaplace.png"
+ ALT="$P(F_i=f_i\vert Y=y) = \frac{c(F_i=f_i,Y=y)+k}{\sum_{f_i}{(c(F_i=f_i,Y=y)+k)}}$">
+</DIV>
+<p>
+If k=0, the probabilities are unsmoothed.  As k grows larger, the probabilities are 
+smoothed more and more. You can use your validation set to determine a good value 
+for k.  <strong>Note</strong>: don't smooth P(Y).
+
+<p><em><strong>Question 1 (6 points)</strong></em>
+Implement <code>trainAndTune</code> and <code>calculateLogJointProbabilities</code> in <code><a href="docs/naiveBayes.html">naiveBayes.py</a></code>. 
+In <code>trainAndTune</code>, estimate conditional probabilities from the training data for each possible value
+of <em>k</em> given in the list <code>kgrid</code>.  
+Evaluate accuracy on the held-out validation set for each <em>k</em> and choose
+the value with the highest validation accuracy.  In case of ties,
+prefer the <em>lowest</em> value of <em>k</em>.  Test your classifier with:
+
+<pre>python dataClassifier.py -c naiveBayes --autotune </pre>
+
+
+
+<p><strong>Hints and observations:</strong>
+<ul>
+    <li> The method <code>calculateLogJointProbabilities</code> uses the conditional probability tables constructed by 
+<code>trainAndTune</code> to compute the log posterior probability for each label y given a feature vector. The comments of the method describe the data structures of the input and output.
+    <li> You can add code to the <code>analysis</code> method in <code><a href="docs/dataClassifier.html">dataClassifier.py</a></code> to explore the mistakes that your classifier is making.  This is optional.
+    <li> When trying different values of the smoothing parameter <em>k</em>, think about the number of times you scan the training data. Your code should save computation by avoiding redundant reading.
+    <li> To run your classifier with only one particular value of <em>k</em>, remove the <code>--autotune</code> option.  This will ensure that <code>kgrid</code> has only one value, which you can change with <code>-k</code>.
+    <li> Using a fixed value of <em>k=2</em> and 100 training examples, you should get a validation accuracy of about 69% and a test accuracy of 55%.
+    <li> Using <code>--autotune</code>, which tries different values of <em>k</em>, you should get a validation accuracy of about 74% and a test accuracy of 65%.
+    <li> Accuracies may vary slightly because of implementation details.  For instance, ties are not deterministically
+        broken in the <code>Counter.argMax()</code> method.
+    <li> To run on the face recognition dataset, use <code>-d faces</code> (optional).
+</ul>
+
+
+</p><h4>Odds Ratios</h4>
+One important tool in using classifiers in real domains is being able
+to inspect what they have learned.  One way to inspect a naive Bayes
+model is to look at the most likely features for a given label.
+
+<P>
+Another, better, tool for understanding the parameters is to look at <I>odds ratios</I>.  For each pixel
+feature <IMG
+ WIDTH="20" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img13.png"
+ ALT="$F_i$"> and classes <IMG
+ WIDTH="41" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img23_new.png"
+ ALT="$y_1, y_2$">, consider the odds ratio:
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<IMG
+ SRC="images/img24.png"
+ ALT="\begin{displaymath}
+\mbox{odds}(F_i=on, y_1, y_2) = \frac{P(F_i=on\vert y_1)}{P(F_i=on\vert y_2)}
+\end{displaymath}">
+</DIV>
+<BR CLEAR="ALL">
+<P></P>
+This ratio will be greater than one for features which cause belief in
+<IMG
+ WIDTH="19" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img25_new.png"
+ ALT="$y_1$"> to increase relative to <IMG
+ WIDTH="19" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img26_new.png"
+ ALT="$y_2$">.
+
+<P> The features that have the greatest impact at classification time are those with both a high
+probability (because they appear often in the data) and a high odds ratio (because they strongly bias
+one label versus another).
+
+<P><em><strong>Question 2 (2 points)</strong></em>
+Fill in the function <code>findHighOddsFeatures(self, label1, label2)</code>. 
+It should return a list of the 100 features with highest odds ratios for <code>label1</code>
+over <code>label2</code>.
+The option <code>-o</code> activates an odds ratio analysis.
+Use the options <code>-1 label1 -2 label2</code> to specify which labels to compare. Running the following command will show you the 100 pixels that best distinguish between a 3 and a 6.
+
+<pre>python dataClassifier.py -a -d digits -c naiveBayes -o -1 3 -2 6  </pre>
+
+Use what you learn from running this command to answer the following question. Which of the following images best shows those pixels
+which have a high odds ratio with respect to 3 over 6? (That is, which of these is most like the output from the command you just ran?)
+<center>
+<table>
+  <tr>
+    <td><img width="80" height="250" src="images/q2a.png"></td>
+    <td><img width="80" height="250" src="images/q2b.png"></td>
+    <td><img width="80" height="250" src="images/q2c.png"></td>
+    <td><img width="80" height="250" src="images/q2d.png"></td>
+    <td><img width="80" height="250" src="images/q2e.png"></td>
+  </tr>
+  <tr><td><center>(a)</center></td><td><center>(b)</center></td><td><center>(c)</center></td><td><center>(d)</center></td><td><center>(e)</center></td></tr>
+</table>
+</center>
+
+
+<em>To answer:</em> please return 'a', 'b', 'c', 'd', or 'e' from the function <code>q2</code> in <code><a href="docs/answers.html">answers.py</a></code>. <em>Note:</em> this part
+of the question will not be autograded.
+
+
+<h2>Perceptron</h2>
+<br/>
+A skeleton implementation of a perceptron classifier is provided for
+you in <code><a href="docs/perceptron.html">perceptron.py</a></code>. You will fill in the 
+<code>train</code> function, and the <code>findHighWeightFeatures</code> function.
+
+<P>
+Unlike the naive Bayes classifier, a perceptron does not use
+probabilities to make its decisions.  Instead, it keeps a
+weight vector <IMG
+ WIDTH="24" HEIGHT="17" ALIGN="BOTTOM" BORDER="0"
+ SRC="images/img31_new.png"
+ ALT="$w^y$"> of each class <IMG
+ WIDTH="13" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img32_new.png"
+ ALT="$y$"> (<IMG
+  WIDTH="13" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+  SRC="images/img32_new.png"
+  ALT="$y$"> is an identifier, not an exponent).  Given a feature list <IMG
+ WIDTH="14" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img33.png"
+ ALT="$f$">,
+the perceptron compute the class <IMG
+ WIDTH="13" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img32_new.png"
+ ALT="$y$"> whose weight vector is most similar
+to the input vector <IMG
+ WIDTH="14" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img33.png"
+ ALT="$f$">.  Formally, given a feature vector <IMG
+ WIDTH="14" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img33.png"
+ ALT="$f$"> (in our case, a map from pixel locations to indicators of whether they are on), we score each class with:
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<IMG
+ SRC="images/img34.png"
+ ALT="\begin{displaymath}
+\mbox{score}(f,y) = \sum_i f_i w^y_i
+\end{displaymath}">
+</DIV>
+Then we choose the class with highest score as the predicted label for that data instance.
+In the code, we will represent <IMG
+ WIDTH="24" HEIGHT="17" ALIGN="BOTTOM" BORDER="0"
+ SRC="images/img31_new.png"
+ ALT="$w^y$"> as a <code>Counter</code>.
+
+</p><h4>Learning weights</h4>
+In the
+basic multi-class perceptron, we scan over the data, one instance at a
+time.  When we come to an instance <IMG
+ WIDTH="41" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img35.png"
+ ALT="$(f, y)$">, we find the label with highest score:
+<DIV ALIGN="CENTER">
+<IMG
+ SRC="images/img36.png"
+ ALT="\begin{displaymath}
+y' = \textmd{arg max}_{y''} score(f,y'')
+\end{displaymath}">
+</DIV>
+<P></P>
+We compare <IMG
+ WIDTH="17" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img37.png"
+ ALT="$y'$"> to the true label <IMG
+ WIDTH="13" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img32_new.png"
+ ALT="$y$">.  If <IMG
+ WIDTH="47" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img38.png"
+ ALT="$y' = y$">, we've gotten the
+instance correct, and we do nothing.  Otherwise, we guessed <IMG
+ WIDTH="17" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img37.png"
+ ALT="$y'$"> but
+we should have guessed <IMG
+ WIDTH="13" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img32_new.png"
+ ALT="$y$">.  That means that <IMG
+ WIDTH="24" HEIGHT="17" ALIGN="BOTTOM" BORDER="0"
+ SRC="images/img31_new.png"
+ ALT="$w^y$"> should have scored <IMG
+  WIDTH="14" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+  SRC="images/img33.png"
+  ALT="$f$"> higher, and <IMG
+ WIDTH="28" HEIGHT="18" ALIGN="BOTTOM" BORDER="0"
+ SRC="images/img39.png"
+ ALT="$w^{y'}$"> should have scored
+<IMG
+ WIDTH="14" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+ SRC="images/img33.png"
+ ALT="$f$"> lower, in order to prevent this error in the future.  We update these two weight vectors accordingly:
+<BR><P></P>
+<DIV ALIGN="CENTER">
+<IMG
+ SRC="images/img40.png"
+ ALT="\begin{displaymath}
+w^y += f
+\end{displaymath}">
+</DIV>
+<DIV ALIGN="CENTER">
+<IMG
+ SRC="images/img41.png"
+ ALT="\begin{displaymath}
+w^{y'} -= f
+\end{displaymath}">
+</DIV>
+<P></P>
+
+<P>
+Using the addition, subtraction, and multiplication functionality of the
+<code>Counter</code> class in <code><a href="docs/util.html">util.py</a></code>, the perceptron updates should be
+relatively easy to code.  Certain implementation issues have been
+taken care of for you in <code><a href="docs/perceptron.html">perceptron.py</a></code>, such as handling iterations
+over the training data and ordering the update trials.  Furthermore,
+the code sets up the <code>weights</code> data structure for you.  Each
+legal label needs its own <code>Counter</code> full of weights.
+
+<P>
+
+<em><strong>Question 3 (4 points)</strong></em>  Fill in the <code>train</code> method in <code><a href="docs/perceptron.html">perceptron.py</a></code>.  Run your code with:
+
+<pre>python dataClassifier.py -c perceptron </pre>
+
+<p><strong>Hints and observations:</strong>
+<ul>
+  <li> The command above should yield validation accuracies in the range between 40% to 70%
+and test accuracy between 40% and 70% (with the default 3 iterations).  These ranges are wide because the perceptron is a lot more sensitive to the specific choice of tie-breaking than naive Bayes.
+  <li> One of the problems with the perceptron is that its performance is sensitive to
+several practical details, such as how many iterations you train it for, and the order you 
+use for the training examples (in practice, using a randomized order works better
+than a fixed order).  The current code uses a default value of 3 training iterations. You
+can change the number of iterations for the perceptron with the <code>-i iterations</code>
+option. Try different numbers of iterations and see how it influences the performance.
+In practice, you would use the performance on the validation set to figure out
+when to stop training, but you don't need to implement this stopping criterion for
+this assignment.
+</ul>
+
+</p><h4>Visualizing weights</h4>
+Perceptron classifiers, and other discriminative methods, are often criticized 
+because the parameters they learn are hard to interpret.  To see a demonstration 
+of this issue, we can write a function to find features that are characteristic of
+one class. (Note that, because of the way perceptrons are trained, it is not
+as crucial to find odds ratios.)
+
+<P>
+<em><strong>Question 4 (1 point)</strong></em> Fill in <code>findHighWeightFeatures(self, label)</code> in <code><a href="docs/perceptron.html">perceptron.py</a></code>. 
+It should return a list of the 100 features with highest weight for that label. You can display the 100 pixels with the largest weights 
+using the command:
+
+<pre>python dataClassifier.py -c perceptron -w  </pre>
+
+Use this command to look at the weights, and answer the following true/false question. Which of the following sequence of weights is
+most representative of the perceptron?
+<center>
+<table>
+  <tr>
+    <td><b>(a)</b></td>
+    <td><img width="80" height="250" src="images/q4a0.png"></td>
+    <td><img width="81" height="250" src="images/q4a1.png"></td>
+    <td><img width="81" height="250" src="images/q4a2.png"></td>
+    <td><img width="81" height="250" src="images/q4a3.png"></td>
+    <td><img width="81" height="250" src="images/q4a4.png"></td>
+    <td><img width="81" height="250" src="images/q4a5.png"></td>
+    <td><img width="81" height="250" src="images/q4a6.png"></td>
+    <td><img width="81" height="250" src="images/q4a7.png"></td>
+    <td><img width="81" height="250" src="images/q4a8.png"></td>
+    <td><img width="81" height="250" src="images/q4a9.png"></td>
+  </tr>
+  <tr>
+    <td><b>(b)</b></td>
+    <td><img width="80" height="250" src="images/q4b0.png"></td>
+    <td><img width="81" height="250" src="images/q4b1.png"></td>
+    <td><img width="81" height="250" src="images/q4b2.png"></td>
+    <td><img width="81" height="250" src="images/q4b3.png"></td>
+    <td><img width="81" height="250" src="images/q4b4.png"></td>
+    <td><img width="81" height="250" src="images/q4b5.png"></td>
+    <td><img width="81" height="250" src="images/q4b6.png"></td>
+    <td><img width="81" height="250" src="images/q4b7.png"></td>
+    <td><img width="81" height="250" src="images/q4b8.png"></td>
+    <td><img width="81" height="250" src="images/q4b9.png"></td>
+  </tr>
+</table>
+</center>
+
+Answer the question <code><a href="docs/answers.html">answers.py</a></code> in the method <code>q4</code>, returning either 'a' or 'b'. <em>Note:</em> the autograder will not grade this question.
+
+
+
+<h2>MIRA</h2>
+A skeleton implementation of the MIRA classifier is provided for you in <code><a href="docs/mira.html">mira.py</a></code>. MIRA is an online learner which is closely related to both the support vector machine and perceptron classifiers.  You will fill in the <code>trainAndTune</code> function.
+
+<h4>Theory</h4>
+Similar to a multi-class perceptron classifier, multi-class MIRA classifier also keeps a 
+ weight vector <IMG
+     WIDTH="24" HEIGHT="17" ALIGN="BOTTOM" BORDER="0"
+     SRC="images/img31_new.png"
+     ALT="$w^y$"> of each label <IMG
+     WIDTH="13" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+     SRC="images/img32_new.png"
+     ALT="$y$">.
+     We also scan over the data, one instance at a
+    time.  When we come to an instance <IMG
+     WIDTH="41" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+     SRC="images/img35.png"
+     ALT="$(f, y)$">, we find the label with highest score:
+    <DIV ALIGN="CENTER">
+    <IMG
+     SRC="images/img36.png"
+     />
+    </DIV>
+    <P></P>
+    We compare <IMG
+     WIDTH="17" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+     SRC="images/img37.png"
+     ALT="$y'$"> to the true label <IMG
+     WIDTH="13" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+     SRC="images/img32_new.png"
+     ALT="$y$">.  If <IMG
+     WIDTH="47" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+     SRC="images/img38.png"
+     ALT="$y' = y$">, we've gotten the
+    instance correct, and we do nothing.  Otherwise, we guessed <IMG
+     WIDTH="17" HEIGHT="32" ALIGN="MIDDLE" BORDER="0"
+     SRC="images/img37.png"
+     ALT="$y'$"> but
+    we should have guessed <IMG
+     WIDTH="13" HEIGHT="30" ALIGN="MIDDLE" BORDER="0"
+     SRC="images/img32_new.png"
+     ALT="$y$">. Unlike perceptron, we update the weight vectors of these labels with variable step size:
+    <BR><P></P>
+    <DIV ALIGN="CENTER">
+    <IMG
+     SRC="images/img59.png"
+     >
+    </DIV>
+    <DIV ALIGN="CENTER">
+    <IMG
+     SRC="images/img60.png"
+     >     
+    </DIV>
+    where <img src="images/img66.png"> is chosen such that it minimizes
+    <DIV ALIGN="CENTER">
+    <IMG
+     SRC="images/img61.png"
+     >
+    </div>
+    <DIV ALIGN="CENTER">
+    
+    subject to the condition that
+    <IMG
+     SRC="images/img62.png" align="bottom"
+     >
+     </div>
+     <br/>
+     which is equivalent to 
+     <DIV ALIGN="CENTER">
+     <IMG
+      SRC="images/img63.png"
+      align="middle"
+      >
+     subject to 
+     <IMG
+      SRC="images/img65.png" align="middle"
+      > and 
+      <IMG
+        SRC="images/img66.png" align="middle"
+        >
+      </div>
+    <P></P>
+    Note that, <img src="images/img68.png" align="middle"/>, so the condition <img src="images/img66.png" align="middle"/> is always true given <img src="images/img65.png" align="middle"/> Solving this simple problem, we then have
+    <DIV ALIGN="CENTER">
+     <IMG
+      SRC="images/img64.png"
+      >
+     </div>
+     However, we would like to cap the maximum possible value of <img src="images/tau.png"> by a positive constant C, which leads us to 
+     <DIV ALIGN="CENTER">
+      <IMG
+       SRC="images/img67.png"
+       >
+      </div>
+<br/>
+<em><strong>Question 5 (6 points)</strong></em> Implement <code>trainAndTune</code> in <code><a href="docs/mira.html">mira.py</a></code>.   
+This method should train a MIRA classifier using each value of <em>C</em> in <code>Cgrid</code>.  
+Evaluate accuracy on the held-out validation set for each <em>C</em> and choose
+the <em>C</em> with the highest validation accuracy.  In case of ties,
+prefer the <em>lowest</em> value of <em>C</em>.  Test your MIRA implementation with:
+
+<pre>python dataClassifier.py -c mira --autotune </pre>
+
+<p><strong>Hints and observations:</strong>
+<ul> 
+    <li>Pass through the data <code>self.max_iterations</code> times during training.
+    <li>Store the weights learned using the best value of <em>C</em> at the end in <code>self.weights</code>, so that these weights can be used to test your classifier.
+    <li>To use a fixed value of <em>C=0.001</em>, remove the <code>--autotune</code> option from the command above.  
+    <li>Validation and test accuracy when using <code>--autotune</code> should be in the 60's.
+    <li>It might save some debugging time if the +1 term above is implemented as +1.0, due to division truncation of integer arguments. Depending on how you implement this, it may not matter.</li>
+	<li>The same code for returning high odds features in your perceptron implementation should also work for MIRA if you're curious what your classifier is learning.
+</ul>
+
+
+<h2>Feature Design</h2>
+
+<p>Building classifiers is only a small part of getting a good system working 
+for a task.  Indeed, the main difference between a good classification system and a bad one is 
+usually not the classifier itself (e.g. perceptron vs. naive Bayes), but rather 
+the quality of the features used.  So far, we have used the simplest 
+possible features: the identity of each pixel (being on/off).
+
+<p>To increase your classifier's accuracy further, you will need to extract 
+more useful features from the data.  The <code>EnhancedFeatureExtractorDigit</code> 
+in <code><a href="docs/dataClassifier.html">dataClassifier.py</a></code> is your new playground.  When analyzing your classifiers' results, you should look at some of your errors and look for characteristics of the input that would 
+give the classifier useful information about the label.  You can add code to the <code>analysis</code> function in <code><a href="docs/dataClassifier.html">dataClassifier.py</a></code> to inspect what your classifier is doing.
+For instance in the digit data, consider the number of 
+separate, connected regions of white pixels, which varies by digit type.  
+1, 2, 3, 5, 7 tend to have one 
+contiguous region of white space while the loops in 6, 8, 9 create more.  
+The number of white regions in a 
+4 depends on the writer.  This is an example of a feature that is not directly 
+available to the classifier from the per-pixel information.  If your feature 
+extractor adds new features that encode these properties, 
+the classifier will be able exploit them.  Note that some features may require non-trivial computation to extract, so write efficient and correct code.
+
+<p>
+<em><strong>Question 6 (6 points)</strong></em>
+Add new features for the digit dataset in the 
+<code>EnhancedFeatureExtractorDigit</code> function <em>in such a way that it works
+with your implementation of the naive Bayes classifier</em>: this means that 
+for this part, you are restricted to features which can take a finite number of discrete
+values (and if you have assumed that features are binary valued, then you are restricted to binary features).
+Note that you can encode a feature which takes 3 values [1,2,3] by using 3
+binary features, of which only one is on at the time, to indicate which
+of the three possibilities you have. In theory, features aren't conditionally independent as naive Bayes requires,
+but your classifier can still work well in practice.  We will test your classifier with the following command:
+
+<pre>python dataClassifier.py -d digits -c naiveBayes -f -a -t 1000  </pre>
+
+With the basic features (without the <code>-f</code> option), your optimal
+choice of smoothing parameter should yield 82% on the validation set with a
+test performance of 79%. You will receive 3 points for implementing new feature(s)
+which yield any improvement at all.  You will receive 3 additional points if your new feature(s) give you a 
+test performance greater than or equal to 84% with the above command.
+
+<p>
+<em><strong>Mini Contest (3 points extra credit)</strong></em>
+How well can you classify? Fill in code in <code><a href="docs/minicontest.html">minicontest.py</a></code> for training and classification.
+To run your classifier, use:
+
+<pre>python dataClassifier.py -d digits -c minicontest</pre>
+
+When you specify the minicontest classifier, features are extracted using
+<code>contestFeatureExtractorDigit</code>.
+
+You are free to implement any classifier you want. You might consider modifying Mira or NaiveBayes,
+for example. You should encode any tuning parameters directly in <code><a href="docs/minicontest.html">minicontest.py</a></code>.
+
+We will allow your classifier to train on 5000 examples, but will test you on a new set of 1000 digits. To
+submit your answers you should run:
+
+<pre>python runMinicontest.py</pre>
+
+This will run your minicontest classifier using the extended train and test set, dumping the output to
+<code>minicontest_output.pickle</code>, which is a serialized object file. You will then submit this file,
+along with anything else. <em>Note:</em> even if you decide not to enter the contest, this file must be
+present for your submission to go through. Also, we will not run your classifier in the autograder, except
+for a very small sanity check.
+
+The 3 teams with the highest classification accuracy will receive 3, 2, and 1 points, respectively.
+Don't forget to describe what you've done in your comments.
+
+<p><em> Congratulations! You're finished with the CS 188 projects.</em>
+</body>
+</html>

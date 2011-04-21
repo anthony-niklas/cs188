@@ -1,0 +1,365 @@
+<html>
+  <head>
+  <title>dataClassifier.py</title>
+  </head>
+  <body>
+  <h3>dataClassifier.py (<a href="../dataClassifier.py">original</a>)</h3>
+  <hr>
+  <pre>
+<span style="color: green; font-style: italic"># dataClassifier.py
+# -----------------
+# Licensing Information: Please do not distribute or publish solutions to this
+# project. You are free to use and extend these projects for educational
+# purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
+# John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+
+# This file contains feature extraction methods and harness 
+# code for data classification
+
+</span><span style="color: blue; font-weight: bold">import </span>mostFrequent
+<span style="color: blue; font-weight: bold">import </span>naiveBayes
+<span style="color: blue; font-weight: bold">import </span>perceptron
+<span style="color: blue; font-weight: bold">import </span>mira
+<span style="color: blue; font-weight: bold">import </span>samples
+<span style="color: blue; font-weight: bold">import </span>sys
+<span style="color: blue; font-weight: bold">import </span>util
+
+TEST_SET_SIZE <span style="font-weight: bold">= </span><span style="color: red">100
+</span>DIGIT_DATUM_WIDTH<span style="font-weight: bold">=</span><span style="color: red">28
+</span>DIGIT_DATUM_HEIGHT<span style="font-weight: bold">=</span><span style="color: red">28
+</span>FACE_DATUM_WIDTH<span style="font-weight: bold">=</span><span style="color: red">60
+</span>FACE_DATUM_HEIGHT<span style="font-weight: bold">=</span><span style="color: red">70
+
+
+</span><span style="color: blue; font-weight: bold">def </span>basicFeatureExtractorDigit<span style="font-weight: bold">(</span>datum<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  Returns a set of pixel features indicating whether
+  each pixel in the provided datum is white (0) or gray/black (1)
+  """
+  </span>a <span style="font-weight: bold">= </span>datum<span style="font-weight: bold">.</span>getPixels<span style="font-weight: bold">()
+
+  </span>features <span style="font-weight: bold">= </span>util<span style="font-weight: bold">.</span>Counter<span style="font-weight: bold">()
+  </span><span style="color: blue; font-weight: bold">for </span>x <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>DIGIT_DATUM_WIDTH<span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">for </span>y <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>DIGIT_DATUM_HEIGHT<span style="font-weight: bold">):
+      </span><span style="color: blue; font-weight: bold">if </span>datum<span style="font-weight: bold">.</span>getPixel<span style="font-weight: bold">(</span>x<span style="font-weight: bold">, </span>y<span style="font-weight: bold">) &gt; </span><span style="color: red">0</span><span style="font-weight: bold">:
+        </span>features<span style="font-weight: bold">[(</span>x<span style="font-weight: bold">,</span>y<span style="font-weight: bold">)] = </span><span style="color: red">1
+      </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+        </span>features<span style="font-weight: bold">[(</span>x<span style="font-weight: bold">,</span>y<span style="font-weight: bold">)] = </span><span style="color: red">0
+  </span><span style="color: blue; font-weight: bold">return </span>features
+
+<span style="color: blue; font-weight: bold">def </span>basicFeatureExtractorFace<span style="font-weight: bold">(</span>datum<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  Returns a set of pixel features indicating whether
+  each pixel in the provided datum is an edge (1) or no edge (0)
+  """
+  </span>a <span style="font-weight: bold">= </span>datum<span style="font-weight: bold">.</span>getPixels<span style="font-weight: bold">()
+
+  </span>features <span style="font-weight: bold">= </span>util<span style="font-weight: bold">.</span>Counter<span style="font-weight: bold">()
+  </span><span style="color: blue; font-weight: bold">for </span>x <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>FACE_DATUM_WIDTH<span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">for </span>y <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>FACE_DATUM_HEIGHT<span style="font-weight: bold">):
+      </span><span style="color: blue; font-weight: bold">if </span>datum<span style="font-weight: bold">.</span>getPixel<span style="font-weight: bold">(</span>x<span style="font-weight: bold">, </span>y<span style="font-weight: bold">) &gt; </span><span style="color: red">0</span><span style="font-weight: bold">:
+        </span>features<span style="font-weight: bold">[(</span>x<span style="font-weight: bold">,</span>y<span style="font-weight: bold">)] = </span><span style="color: red">1
+      </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+        </span>features<span style="font-weight: bold">[(</span>x<span style="font-weight: bold">,</span>y<span style="font-weight: bold">)] = </span><span style="color: red">0
+  </span><span style="color: blue; font-weight: bold">return </span>features
+
+<span style="color: blue; font-weight: bold">def </span>enhancedFeatureExtractorDigit<span style="font-weight: bold">(</span>datum<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  Your feature extraction playground.
+  
+  You should return a util.Counter() of features
+  for this datum (datum is of type samples.Datum).
+  
+  ## DESCRIBE YOUR ENHANCED FEATURES HERE...
+  
+  ##
+  """
+  </span>features <span style="font-weight: bold">=  </span>basicFeatureExtractorDigit<span style="font-weight: bold">(</span>datum<span style="font-weight: bold">)
+
+  </span><span style="color: red">"*** YOUR CODE HERE ***"
+  
+  </span><span style="color: blue; font-weight: bold">return </span>features
+
+
+<span style="color: blue; font-weight: bold">def </span>contestFeatureExtractorDigit<span style="font-weight: bold">(</span>datum<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  Specify features to use for the minicontest
+  """
+  </span>features <span style="font-weight: bold">=  </span>basicFeatureExtractorDigit<span style="font-weight: bold">(</span>datum<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">return </span>features
+
+<span style="color: blue; font-weight: bold">def </span>enhancedFeatureExtractorFace<span style="font-weight: bold">(</span>datum<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  Your feature extraction playground for faces.
+  It is your choice to modify this.
+  """
+  </span>features <span style="font-weight: bold">=  </span>basicFeatureExtractorFace<span style="font-weight: bold">(</span>datum<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">return </span>features
+
+<span style="color: blue; font-weight: bold">def </span>analysis<span style="font-weight: bold">(</span>classifier<span style="font-weight: bold">, </span>guesses<span style="font-weight: bold">, </span>testLabels<span style="font-weight: bold">, </span>testData<span style="font-weight: bold">, </span>rawTestData<span style="font-weight: bold">, </span>printImage<span style="font-weight: bold">):
+  </span><span style="color: darkred">"""
+  This function is called after learning.
+  Include any code that you want here to help you analyze your results.
+  
+  Use the printImage(&lt;list of pixels&gt;) function to visualize features.
+  
+  An example of use has been given to you.
+  
+  - classifier is the trained classifier
+  - guesses is the list of labels predicted by your classifier on the test set
+  - testLabels is the list of true labels
+  - testData is the list of training datapoints (as util.Counter of features)
+  - rawTestData is the list of training datapoints (as samples.Datum)
+  - printImage is a method to visualize the features 
+  (see its use in the odds ratio part in runClassifier method)
+  
+  This code won't be evaluated. It is for your own optional use
+  (and you can modify the signature if you want).
+  """
+  
+  </span><span style="color: green; font-style: italic"># Put any code here...
+  # Example of use:
+  </span><span style="color: blue; font-weight: bold">for </span>i <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>len<span style="font-weight: bold">(</span>guesses<span style="font-weight: bold">)):
+      </span>prediction <span style="font-weight: bold">= </span>guesses<span style="font-weight: bold">[</span>i<span style="font-weight: bold">]
+      </span>truth <span style="font-weight: bold">= </span>testLabels<span style="font-weight: bold">[</span>i<span style="font-weight: bold">]
+      </span><span style="color: blue; font-weight: bold">if </span><span style="font-weight: bold">(</span>prediction <span style="font-weight: bold">!= </span>truth<span style="font-weight: bold">):
+          </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"==================================="
+          </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Mistake on example %d" </span><span style="font-weight: bold">% </span>i 
+          <span style="color: blue; font-weight: bold">print </span><span style="color: red">"Predicted %d; truth is %d" </span><span style="font-weight: bold">% (</span>prediction<span style="font-weight: bold">, </span>truth<span style="font-weight: bold">)
+          </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Image: "
+          </span><span style="color: blue; font-weight: bold">print </span>rawTestData<span style="font-weight: bold">[</span>i<span style="font-weight: bold">]
+          </span><span style="color: blue; font-weight: bold">break
+
+
+</span><span style="color: green; font-style: italic">## =====================
+## You don't have to modify any code below.
+## =====================
+
+
+</span><span style="color: blue; font-weight: bold">class </span>ImagePrinter<span style="font-weight: bold">:
+    </span><span style="color: blue; font-weight: bold">def </span>__init__<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>width<span style="font-weight: bold">, </span>height<span style="font-weight: bold">):
+      </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>width <span style="font-weight: bold">= </span>width
+      <span style="color: blue">self</span><span style="font-weight: bold">.</span>height <span style="font-weight: bold">= </span>height
+
+    <span style="color: blue; font-weight: bold">def </span>printImage<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>pixels<span style="font-weight: bold">):
+      </span><span style="color: darkred">"""
+      Prints a Datum object that contains all pixels in the 
+      provided list of pixels.  This will serve as a helper function
+      to the analysis function you write.
+      
+      Pixels should take the form 
+      [(2,2), (2, 3), ...] 
+      where each tuple represents a pixel.
+      """
+      </span>image <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>Datum<span style="font-weight: bold">(</span><span style="color: blue">None</span><span style="font-weight: bold">,</span><span style="color: blue">self</span><span style="font-weight: bold">.</span>width<span style="font-weight: bold">,</span><span style="color: blue">self</span><span style="font-weight: bold">.</span>height<span style="font-weight: bold">)
+      </span><span style="color: blue; font-weight: bold">for </span>pix <span style="color: blue; font-weight: bold">in </span>pixels<span style="font-weight: bold">:
+        </span><span style="color: blue; font-weight: bold">try</span><span style="font-weight: bold">:
+            </span><span style="color: green; font-style: italic"># This is so that new features that you could define which 
+            # which are not of the form of (x,y) will not break
+            # this image printer...
+            </span>x<span style="font-weight: bold">,</span>y <span style="font-weight: bold">= </span>pix
+            image<span style="font-weight: bold">.</span>pixels<span style="font-weight: bold">[</span>x<span style="font-weight: bold">][</span>y<span style="font-weight: bold">] = </span><span style="color: red">2
+        </span><span style="color: blue; font-weight: bold">except</span><span style="font-weight: bold">:
+            </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"new features:"</span><span style="font-weight: bold">, </span>pix
+            <span style="color: blue; font-weight: bold">continue
+      print </span>image  
+
+<span style="color: blue; font-weight: bold">def </span>default<span style="font-weight: bold">(</span>str<span style="font-weight: bold">):
+  </span><span style="color: blue; font-weight: bold">return </span>str <span style="font-weight: bold">+ </span><span style="color: red">' [Default: %default]'
+
+</span><span style="color: blue; font-weight: bold">def </span>readCommand<span style="font-weight: bold">( </span>argv <span style="font-weight: bold">):
+  </span><span style="color: red">"Processes the command used to run from the command line."
+  </span><span style="color: blue; font-weight: bold">from </span>optparse <span style="color: blue; font-weight: bold">import </span>OptionParser  
+  parser <span style="font-weight: bold">= </span>OptionParser<span style="font-weight: bold">(</span>USAGE_STRING<span style="font-weight: bold">)
+  
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-c'</span><span style="font-weight: bold">, </span><span style="color: red">'--classifier'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">'The type of classifier'</span><span style="font-weight: bold">), </span>choices<span style="font-weight: bold">=[</span><span style="color: red">'mostFrequent'</span><span style="font-weight: bold">, </span><span style="color: red">'nb'</span><span style="font-weight: bold">, </span><span style="color: red">'naiveBayes'</span><span style="font-weight: bold">, </span><span style="color: red">'perceptron'</span><span style="font-weight: bold">, </span><span style="color: red">'mira'</span><span style="font-weight: bold">, </span><span style="color: red">'minicontest'</span><span style="font-weight: bold">], </span>default<span style="font-weight: bold">=</span><span style="color: red">'mostFrequent'</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-d'</span><span style="font-weight: bold">, </span><span style="color: red">'--data'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">'Dataset to use'</span><span style="font-weight: bold">), </span>choices<span style="font-weight: bold">=[</span><span style="color: red">'digits'</span><span style="font-weight: bold">, </span><span style="color: red">'faces'</span><span style="font-weight: bold">], </span>default<span style="font-weight: bold">=</span><span style="color: red">'digits'</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-t'</span><span style="font-weight: bold">, </span><span style="color: red">'--training'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">'The size of the training set'</span><span style="font-weight: bold">), </span>default<span style="font-weight: bold">=</span><span style="color: red">100</span><span style="font-weight: bold">, </span>type<span style="font-weight: bold">=</span><span style="color: red">"int"</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-f'</span><span style="font-weight: bold">, </span><span style="color: red">'--features'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">'Whether to use enhanced features'</span><span style="font-weight: bold">), </span>default<span style="font-weight: bold">=</span><span style="color: blue; font-weight: bold">False</span><span style="font-weight: bold">, </span>action<span style="font-weight: bold">=</span><span style="color: red">"store_true"</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-o'</span><span style="font-weight: bold">, </span><span style="color: red">'--odds'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">'Whether to compute odds ratios'</span><span style="font-weight: bold">), </span>default<span style="font-weight: bold">=</span><span style="color: blue; font-weight: bold">False</span><span style="font-weight: bold">, </span>action<span style="font-weight: bold">=</span><span style="color: red">"store_true"</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-1'</span><span style="font-weight: bold">, </span><span style="color: red">'--label1'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">"First label in an odds ratio comparison"</span><span style="font-weight: bold">), </span>default<span style="font-weight: bold">=</span><span style="color: red">0</span><span style="font-weight: bold">, </span>type<span style="font-weight: bold">=</span><span style="color: red">"int"</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-2'</span><span style="font-weight: bold">, </span><span style="color: red">'--label2'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">"Second label in an odds ratio comparison"</span><span style="font-weight: bold">), </span>default<span style="font-weight: bold">=</span><span style="color: red">1</span><span style="font-weight: bold">, </span>type<span style="font-weight: bold">=</span><span style="color: red">"int"</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-w'</span><span style="font-weight: bold">, </span><span style="color: red">'--weights'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">'Whether to print weights'</span><span style="font-weight: bold">), </span>default<span style="font-weight: bold">=</span><span style="color: blue; font-weight: bold">False</span><span style="font-weight: bold">, </span>action<span style="font-weight: bold">=</span><span style="color: red">"store_true"</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-k'</span><span style="font-weight: bold">, </span><span style="color: red">'--smoothing'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">"Smoothing parameter (ignored when using --autotune)"</span><span style="font-weight: bold">), </span>type<span style="font-weight: bold">=</span><span style="color: red">"float"</span><span style="font-weight: bold">, </span>default<span style="font-weight: bold">=</span><span style="color: red">2.0</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-a'</span><span style="font-weight: bold">, </span><span style="color: red">'--autotune'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">"Whether to automatically tune hyperparameters"</span><span style="font-weight: bold">), </span>default<span style="font-weight: bold">=</span><span style="color: blue; font-weight: bold">False</span><span style="font-weight: bold">, </span>action<span style="font-weight: bold">=</span><span style="color: red">"store_true"</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-i'</span><span style="font-weight: bold">, </span><span style="color: red">'--iterations'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">"Maximum iterations to run training"</span><span style="font-weight: bold">), </span>default<span style="font-weight: bold">=</span><span style="color: red">3</span><span style="font-weight: bold">, </span>type<span style="font-weight: bold">=</span><span style="color: red">"int"</span><span style="font-weight: bold">)
+  </span>parser<span style="font-weight: bold">.</span>add_option<span style="font-weight: bold">(</span><span style="color: red">'-s'</span><span style="font-weight: bold">, </span><span style="color: red">'--test'</span><span style="font-weight: bold">, </span>help<span style="font-weight: bold">=</span>default<span style="font-weight: bold">(</span><span style="color: red">"Amount of test data to use"</span><span style="font-weight: bold">), </span>default<span style="font-weight: bold">=</span>TEST_SET_SIZE<span style="font-weight: bold">, </span>type<span style="font-weight: bold">=</span><span style="color: red">"int"</span><span style="font-weight: bold">)
+
+  </span>options<span style="font-weight: bold">, </span>otherjunk <span style="font-weight: bold">= </span>parser<span style="font-weight: bold">.</span>parse_args<span style="font-weight: bold">(</span>argv<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">if </span>len<span style="font-weight: bold">(</span>otherjunk<span style="font-weight: bold">) != </span><span style="color: red">0</span><span style="font-weight: bold">: </span><span style="color: blue; font-weight: bold">raise </span>Exception<span style="font-weight: bold">(</span><span style="color: red">'Command line input not understood: ' </span><span style="font-weight: bold">+ </span>str<span style="font-weight: bold">(</span>otherjunk<span style="font-weight: bold">))
+  </span>args <span style="font-weight: bold">= {}
+  
+  </span><span style="color: green; font-style: italic"># Set up variables according to the command line input.
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Doing classification"
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"--------------------"
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"data:\t\t" </span><span style="font-weight: bold">+ </span>options<span style="font-weight: bold">.</span>data
+  <span style="color: blue; font-weight: bold">print </span><span style="color: red">"classifier:\t\t" </span><span style="font-weight: bold">+ </span>options<span style="font-weight: bold">.</span>classifier
+  <span style="color: blue; font-weight: bold">if not </span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">'minicontest'</span><span style="font-weight: bold">:
+    </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"using enhanced features?:\t" </span><span style="font-weight: bold">+ </span>str<span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>features<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+    </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"using minicontest feature extractor"
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"training set size:\t" </span><span style="font-weight: bold">+ </span>str<span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>training<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">if</span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>data<span style="font-weight: bold">==</span><span style="color: red">"digits"</span><span style="font-weight: bold">):
+    </span>printImage <span style="font-weight: bold">= </span>ImagePrinter<span style="font-weight: bold">(</span>DIGIT_DATUM_WIDTH<span style="font-weight: bold">, </span>DIGIT_DATUM_HEIGHT<span style="font-weight: bold">).</span>printImage
+    <span style="color: blue; font-weight: bold">if </span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>features<span style="font-weight: bold">):
+      </span>featureFunction <span style="font-weight: bold">= </span>enhancedFeatureExtractorDigit
+    <span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+      </span>featureFunction <span style="font-weight: bold">= </span>basicFeatureExtractorDigit
+    <span style="color: blue; font-weight: bold">if </span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">'minicontest'</span><span style="font-weight: bold">):
+      </span>featureFunction <span style="font-weight: bold">= </span>contestFeatureExtractorDigit
+  <span style="color: blue; font-weight: bold">elif</span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>data<span style="font-weight: bold">==</span><span style="color: red">"faces"</span><span style="font-weight: bold">):
+    </span>printImage <span style="font-weight: bold">= </span>ImagePrinter<span style="font-weight: bold">(</span>FACE_DATUM_WIDTH<span style="font-weight: bold">, </span>FACE_DATUM_HEIGHT<span style="font-weight: bold">).</span>printImage
+    <span style="color: blue; font-weight: bold">if </span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>features<span style="font-weight: bold">):
+      </span>featureFunction <span style="font-weight: bold">= </span>enhancedFeatureExtractorFace
+    <span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+      </span>featureFunction <span style="font-weight: bold">= </span>basicFeatureExtractorFace      
+  <span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+    </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Unknown dataset"</span><span style="font-weight: bold">, </span>options<span style="font-weight: bold">.</span>data
+    <span style="color: blue; font-weight: bold">print </span>USAGE_STRING
+    sys<span style="font-weight: bold">.</span>exit<span style="font-weight: bold">(</span><span style="color: red">2</span><span style="font-weight: bold">)
+    
+  </span><span style="color: blue; font-weight: bold">if</span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>data<span style="font-weight: bold">==</span><span style="color: red">"digits"</span><span style="font-weight: bold">):
+    </span>legalLabels <span style="font-weight: bold">= </span>range<span style="font-weight: bold">(</span><span style="color: red">10</span><span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+    </span>legalLabels <span style="font-weight: bold">= </span>range<span style="font-weight: bold">(</span><span style="color: red">2</span><span style="font-weight: bold">)
+    
+  </span><span style="color: blue; font-weight: bold">if </span>options<span style="font-weight: bold">.</span>training <span style="font-weight: bold">&lt;= </span><span style="color: red">0</span><span style="font-weight: bold">:
+    </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Training set size should be a positive integer (you provided: %d)" </span><span style="font-weight: bold">% </span>options<span style="font-weight: bold">.</span>training
+    <span style="color: blue; font-weight: bold">print </span>USAGE_STRING
+    sys<span style="font-weight: bold">.</span>exit<span style="font-weight: bold">(</span><span style="color: red">2</span><span style="font-weight: bold">)
+    
+  </span><span style="color: blue; font-weight: bold">if </span>options<span style="font-weight: bold">.</span>smoothing <span style="font-weight: bold">&lt;= </span><span style="color: red">0</span><span style="font-weight: bold">:
+    </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Please provide a positive number for smoothing (you provided: %f)" </span><span style="font-weight: bold">% </span>options<span style="font-weight: bold">.</span>smoothing
+    <span style="color: blue; font-weight: bold">print </span>USAGE_STRING
+    sys<span style="font-weight: bold">.</span>exit<span style="font-weight: bold">(</span><span style="color: red">2</span><span style="font-weight: bold">)
+    
+  </span><span style="color: blue; font-weight: bold">if </span>options<span style="font-weight: bold">.</span>odds<span style="font-weight: bold">:
+    </span><span style="color: blue; font-weight: bold">if </span>options<span style="font-weight: bold">.</span>label1 <span style="color: blue; font-weight: bold">not in </span>legalLabels <span style="color: blue; font-weight: bold">or </span>options<span style="font-weight: bold">.</span>label2 <span style="color: blue; font-weight: bold">not in </span>legalLabels<span style="font-weight: bold">:
+      </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Didn't provide a legal labels for the odds ratio: (%d,%d)" </span><span style="font-weight: bold">% (</span>options<span style="font-weight: bold">.</span>label1<span style="font-weight: bold">, </span>options<span style="font-weight: bold">.</span>label2<span style="font-weight: bold">)
+      </span><span style="color: blue; font-weight: bold">print </span>USAGE_STRING
+      sys<span style="font-weight: bold">.</span>exit<span style="font-weight: bold">(</span><span style="color: red">2</span><span style="font-weight: bold">)
+
+  </span><span style="color: blue; font-weight: bold">if</span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">"mostFrequent"</span><span style="font-weight: bold">):
+    </span>classifier <span style="font-weight: bold">= </span>mostFrequent<span style="font-weight: bold">.</span>MostFrequentClassifier<span style="font-weight: bold">(</span>legalLabels<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">elif</span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">"naiveBayes" </span><span style="color: blue; font-weight: bold">or </span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">"nb"</span><span style="font-weight: bold">):
+    </span>classifier <span style="font-weight: bold">= </span>naiveBayes<span style="font-weight: bold">.</span>NaiveBayesClassifier<span style="font-weight: bold">(</span>legalLabels<span style="font-weight: bold">)
+    </span>classifier<span style="font-weight: bold">.</span>setSmoothing<span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>smoothing<span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">if </span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>autotune<span style="font-weight: bold">):
+        </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"using automatic tuning for naivebayes"
+        </span>classifier<span style="font-weight: bold">.</span>automaticTuning <span style="font-weight: bold">= </span><span style="color: blue; font-weight: bold">True
+    else</span><span style="font-weight: bold">:
+        </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"using smoothing parameter k=%f for naivebayes" </span><span style="font-weight: bold">%  </span>options<span style="font-weight: bold">.</span>smoothing
+  <span style="color: blue; font-weight: bold">elif</span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">"perceptron"</span><span style="font-weight: bold">):
+    </span>classifier <span style="font-weight: bold">= </span>perceptron<span style="font-weight: bold">.</span>PerceptronClassifier<span style="font-weight: bold">(</span>legalLabels<span style="font-weight: bold">,</span>options<span style="font-weight: bold">.</span>iterations<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">elif</span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">"mira"</span><span style="font-weight: bold">):
+    </span>classifier <span style="font-weight: bold">= </span>mira<span style="font-weight: bold">.</span>MiraClassifier<span style="font-weight: bold">(</span>legalLabels<span style="font-weight: bold">, </span>options<span style="font-weight: bold">.</span>iterations<span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">if </span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>autotune<span style="font-weight: bold">):
+        </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"using automatic tuning for MIRA"
+        </span>classifier<span style="font-weight: bold">.</span>automaticTuning <span style="font-weight: bold">= </span><span style="color: blue; font-weight: bold">True
+    else</span><span style="font-weight: bold">:
+        </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"using default C=0.001 for MIRA"
+  </span><span style="color: blue; font-weight: bold">elif</span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">'minicontest'</span><span style="font-weight: bold">):
+    </span><span style="color: blue; font-weight: bold">import </span>minicontest
+    classifier <span style="font-weight: bold">= </span>minicontest<span style="font-weight: bold">.</span>contestClassifier<span style="font-weight: bold">(</span>legalLabels<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+    </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Unknown classifier:"</span><span style="font-weight: bold">, </span>options<span style="font-weight: bold">.</span>classifier
+    <span style="color: blue; font-weight: bold">print </span>USAGE_STRING
+    
+    sys<span style="font-weight: bold">.</span>exit<span style="font-weight: bold">(</span><span style="color: red">2</span><span style="font-weight: bold">)
+
+  </span>args<span style="font-weight: bold">[</span><span style="color: red">'classifier'</span><span style="font-weight: bold">] = </span>classifier
+  args<span style="font-weight: bold">[</span><span style="color: red">'featureFunction'</span><span style="font-weight: bold">] = </span>featureFunction
+  args<span style="font-weight: bold">[</span><span style="color: red">'printImage'</span><span style="font-weight: bold">] = </span>printImage
+  
+  <span style="color: blue; font-weight: bold">return </span>args<span style="font-weight: bold">, </span>options
+
+USAGE_STRING <span style="font-weight: bold">= </span><span style="color: darkred">"""
+  USAGE:      python dataClassifier.py &lt;options&gt;
+  EXAMPLES:   (1) python dataClassifier.py
+                  - trains the default mostFrequent classifier on the digit dataset
+                  using the default 100 training examples and
+                  then test the classifier on test data
+              (2) python dataClassifier.py -c naiveBayes -d digits -t 1000 -f -o -1 3 -2 6 -k 2.5
+                  - would run the naive Bayes classifier on 1000 training examples
+                  using the enhancedFeatureExtractorDigits function to get the features
+                  on the faces dataset, would use the smoothing parameter equals to 2.5, would
+                  test the classifier on the test data and performs an odd ratio analysis
+                  with label1=3 vs. label2=6
+                 """
+
+</span><span style="color: green; font-style: italic"># Main harness code
+
+</span><span style="color: blue; font-weight: bold">def </span>runClassifier<span style="font-weight: bold">(</span>args<span style="font-weight: bold">, </span>options<span style="font-weight: bold">):
+
+  </span>featureFunction <span style="font-weight: bold">= </span>args<span style="font-weight: bold">[</span><span style="color: red">'featureFunction'</span><span style="font-weight: bold">]
+  </span>classifier <span style="font-weight: bold">= </span>args<span style="font-weight: bold">[</span><span style="color: red">'classifier'</span><span style="font-weight: bold">]
+  </span>printImage <span style="font-weight: bold">= </span>args<span style="font-weight: bold">[</span><span style="color: red">'printImage'</span><span style="font-weight: bold">]
+      
+  </span><span style="color: green; font-style: italic"># Load data  
+  </span>numTraining <span style="font-weight: bold">= </span>options<span style="font-weight: bold">.</span>training
+  numTest <span style="font-weight: bold">= </span>options<span style="font-weight: bold">.</span>test
+
+  <span style="color: blue; font-weight: bold">if</span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>data<span style="font-weight: bold">==</span><span style="color: red">"faces"</span><span style="font-weight: bold">):
+    </span>rawTrainingData <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadDataFile<span style="font-weight: bold">(</span><span style="color: red">"facedata/facedatatrain"</span><span style="font-weight: bold">, </span>numTraining<span style="font-weight: bold">,</span>FACE_DATUM_WIDTH<span style="font-weight: bold">,</span>FACE_DATUM_HEIGHT<span style="font-weight: bold">)
+    </span>trainingLabels <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadLabelsFile<span style="font-weight: bold">(</span><span style="color: red">"facedata/facedatatrainlabels"</span><span style="font-weight: bold">, </span>numTraining<span style="font-weight: bold">)
+    </span>rawValidationData <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadDataFile<span style="font-weight: bold">(</span><span style="color: red">"facedata/facedatatrain"</span><span style="font-weight: bold">, </span>numTest<span style="font-weight: bold">,</span>FACE_DATUM_WIDTH<span style="font-weight: bold">,</span>FACE_DATUM_HEIGHT<span style="font-weight: bold">)
+    </span>validationLabels <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadLabelsFile<span style="font-weight: bold">(</span><span style="color: red">"facedata/facedatatrainlabels"</span><span style="font-weight: bold">, </span>numTest<span style="font-weight: bold">)
+    </span>rawTestData <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadDataFile<span style="font-weight: bold">(</span><span style="color: red">"facedata/facedatatest"</span><span style="font-weight: bold">, </span>numTest<span style="font-weight: bold">,</span>FACE_DATUM_WIDTH<span style="font-weight: bold">,</span>FACE_DATUM_HEIGHT<span style="font-weight: bold">)
+    </span>testLabels <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadLabelsFile<span style="font-weight: bold">(</span><span style="color: red">"facedata/facedatatestlabels"</span><span style="font-weight: bold">, </span>numTest<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+    </span>rawTrainingData <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadDataFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/trainingimages"</span><span style="font-weight: bold">, </span>numTraining<span style="font-weight: bold">,</span>DIGIT_DATUM_WIDTH<span style="font-weight: bold">,</span>DIGIT_DATUM_HEIGHT<span style="font-weight: bold">)
+    </span>trainingLabels <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadLabelsFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/traininglabels"</span><span style="font-weight: bold">, </span>numTraining<span style="font-weight: bold">)
+    </span>rawValidationData <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadDataFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/validationimages"</span><span style="font-weight: bold">, </span>numTest<span style="font-weight: bold">,</span>DIGIT_DATUM_WIDTH<span style="font-weight: bold">,</span>DIGIT_DATUM_HEIGHT<span style="font-weight: bold">)
+    </span>validationLabels <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadLabelsFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/validationlabels"</span><span style="font-weight: bold">, </span>numTest<span style="font-weight: bold">)
+    </span>rawTestData <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadDataFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/testimages"</span><span style="font-weight: bold">, </span>numTest<span style="font-weight: bold">,</span>DIGIT_DATUM_WIDTH<span style="font-weight: bold">,</span>DIGIT_DATUM_HEIGHT<span style="font-weight: bold">)
+    </span>testLabels <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadLabelsFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/testlabels"</span><span style="font-weight: bold">, </span>numTest<span style="font-weight: bold">)
+    
+  
+  </span><span style="color: green; font-style: italic"># Extract features
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Extracting features..."
+  </span>trainingData <span style="font-weight: bold">= </span>map<span style="font-weight: bold">(</span>featureFunction<span style="font-weight: bold">, </span>rawTrainingData<span style="font-weight: bold">)
+  </span>validationData <span style="font-weight: bold">= </span>map<span style="font-weight: bold">(</span>featureFunction<span style="font-weight: bold">, </span>rawValidationData<span style="font-weight: bold">)
+  </span>testData <span style="font-weight: bold">= </span>map<span style="font-weight: bold">(</span>featureFunction<span style="font-weight: bold">, </span>rawTestData<span style="font-weight: bold">)
+  
+  </span><span style="color: green; font-style: italic"># Conduct training and testing
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Training..."
+  </span>classifier<span style="font-weight: bold">.</span>train<span style="font-weight: bold">(</span>trainingData<span style="font-weight: bold">, </span>trainingLabels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Validating..."
+  </span>guesses <span style="font-weight: bold">= </span>classifier<span style="font-weight: bold">.</span>classify<span style="font-weight: bold">(</span>validationData<span style="font-weight: bold">)
+  </span>correct <span style="font-weight: bold">= [</span>guesses<span style="font-weight: bold">[</span>i<span style="font-weight: bold">] == </span>validationLabels<span style="font-weight: bold">[</span>i<span style="font-weight: bold">] </span><span style="color: blue; font-weight: bold">for </span>i <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>len<span style="font-weight: bold">(</span>validationLabels<span style="font-weight: bold">))].</span>count<span style="font-weight: bold">(</span><span style="color: blue; font-weight: bold">True</span><span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">print </span>str<span style="font-weight: bold">(</span>correct<span style="font-weight: bold">), (</span><span style="color: red">"correct out of " </span><span style="font-weight: bold">+ </span>str<span style="font-weight: bold">(</span>len<span style="font-weight: bold">(</span>validationLabels<span style="font-weight: bold">)) + </span><span style="color: red">" (%.1f%%)."</span><span style="font-weight: bold">) % (</span><span style="color: red">100.0 </span><span style="font-weight: bold">* </span>correct <span style="font-weight: bold">/ </span>len<span style="font-weight: bold">(</span>validationLabels<span style="font-weight: bold">))
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Testing..."
+  </span>guesses <span style="font-weight: bold">= </span>classifier<span style="font-weight: bold">.</span>classify<span style="font-weight: bold">(</span>testData<span style="font-weight: bold">)
+  </span>correct <span style="font-weight: bold">= [</span>guesses<span style="font-weight: bold">[</span>i<span style="font-weight: bold">] == </span>testLabels<span style="font-weight: bold">[</span>i<span style="font-weight: bold">] </span><span style="color: blue; font-weight: bold">for </span>i <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>len<span style="font-weight: bold">(</span>testLabels<span style="font-weight: bold">))].</span>count<span style="font-weight: bold">(</span><span style="color: blue; font-weight: bold">True</span><span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">print </span>str<span style="font-weight: bold">(</span>correct<span style="font-weight: bold">), (</span><span style="color: red">"correct out of " </span><span style="font-weight: bold">+ </span>str<span style="font-weight: bold">(</span>len<span style="font-weight: bold">(</span>testLabels<span style="font-weight: bold">)) + </span><span style="color: red">" (%.1f%%)."</span><span style="font-weight: bold">) % (</span><span style="color: red">100.0 </span><span style="font-weight: bold">* </span>correct <span style="font-weight: bold">/ </span>len<span style="font-weight: bold">(</span>testLabels<span style="font-weight: bold">))
+  </span>analysis<span style="font-weight: bold">(</span>classifier<span style="font-weight: bold">, </span>guesses<span style="font-weight: bold">, </span>testLabels<span style="font-weight: bold">, </span>testData<span style="font-weight: bold">, </span>rawTestData<span style="font-weight: bold">, </span>printImage<span style="font-weight: bold">)
+  
+  </span><span style="color: green; font-style: italic"># do odds ratio computation if specified at command line
+  </span><span style="color: blue; font-weight: bold">if</span><span style="font-weight: bold">((</span>options<span style="font-weight: bold">.</span>odds<span style="font-weight: bold">) &amp; (</span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">"naiveBayes" </span><span style="color: blue; font-weight: bold">or </span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">"nb"</span><span style="font-weight: bold">)) ):
+    </span>label1<span style="font-weight: bold">, </span>label2 <span style="font-weight: bold">= </span>options<span style="font-weight: bold">.</span>label1<span style="font-weight: bold">, </span>options<span style="font-weight: bold">.</span>label2
+    features_odds <span style="font-weight: bold">= </span>classifier<span style="font-weight: bold">.</span>findHighOddsFeatures<span style="font-weight: bold">(</span>label1<span style="font-weight: bold">,</span>label2<span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">if</span><span style="font-weight: bold">(</span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">"naiveBayes" </span><span style="color: blue; font-weight: bold">or </span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">"nb"</span><span style="font-weight: bold">):
+      </span>string3 <span style="font-weight: bold">= </span><span style="color: red">"=== Features with highest odd ratio of label %d over label %d ===" </span><span style="font-weight: bold">% (</span>label1<span style="font-weight: bold">, </span>label2<span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">else</span><span style="font-weight: bold">:
+      </span>string3 <span style="font-weight: bold">= </span><span style="color: red">"=== Features for which weight(label %d)-weight(label %d) is biggest ===" </span><span style="font-weight: bold">% (</span>label1<span style="font-weight: bold">, </span>label2<span style="font-weight: bold">)    
+      
+    </span><span style="color: blue; font-weight: bold">print </span>string3
+    printImage<span style="font-weight: bold">(</span>features_odds<span style="font-weight: bold">)
+
+  </span><span style="color: blue; font-weight: bold">if</span><span style="font-weight: bold">((</span>options<span style="font-weight: bold">.</span>weights<span style="font-weight: bold">) &amp; (</span>options<span style="font-weight: bold">.</span>classifier <span style="font-weight: bold">== </span><span style="color: red">"perceptron"</span><span style="font-weight: bold">)):
+    </span><span style="color: blue; font-weight: bold">for </span>l <span style="color: blue; font-weight: bold">in </span>classifier<span style="font-weight: bold">.</span>legalLabels<span style="font-weight: bold">:
+      </span>features_weights <span style="font-weight: bold">= </span>classifier<span style="font-weight: bold">.</span>findHighWeightFeatures<span style="font-weight: bold">(</span>l<span style="font-weight: bold">)
+      </span><span style="color: blue; font-weight: bold">print </span><span style="font-weight: bold">(</span><span style="color: red">"=== Features with high weight for label %d ==="</span><span style="font-weight: bold">%</span>l<span style="font-weight: bold">)
+      </span>printImage<span style="font-weight: bold">(</span>features_weights<span style="font-weight: bold">)
+
+</span><span style="color: blue; font-weight: bold">if </span>__name__ <span style="font-weight: bold">== </span><span style="color: red">'__main__'</span><span style="font-weight: bold">:
+  </span><span style="color: green; font-style: italic"># Read input
+  </span>args<span style="font-weight: bold">, </span>options <span style="font-weight: bold">= </span>readCommand<span style="font-weight: bold">( </span>sys<span style="font-weight: bold">.</span>argv<span style="font-weight: bold">[</span><span style="color: red">1</span><span style="font-weight: bold">:] ) 
+  </span><span style="color: green; font-style: italic"># Run classifier
+  </span>runClassifier<span style="font-weight: bold">(</span>args<span style="font-weight: bold">, </span>options<span style="font-weight: bold">)
+</span>
+  </pre>
+  </body>
+  </html>
+  

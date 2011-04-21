@@ -1,0 +1,70 @@
+<html>
+  <head>
+  <title>classificationMethod.py</title>
+  </head>
+  <body>
+  <h3>classificationMethod.py (<a href="../classificationMethod.py">original</a>)</h3>
+  <hr>
+  <pre>
+<span style="color: green; font-style: italic"># classificationMethod.py
+# -----------------------
+# Licensing Information: Please do not distribute or publish solutions to this
+# project. You are free to use and extend these projects for educational
+# purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
+# John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+
+# This file contains the abstract class ClassificationMethod
+
+</span><span style="color: blue; font-weight: bold">class </span>ClassificationMethod<span style="font-weight: bold">:
+  </span><span style="color: darkred">"""
+  ClassificationMethod is the abstract superclass of 
+   - MostFrequentClassifier
+   - NaiveBayesClassifier
+   - PerceptronClassifier
+   - MiraClassifier
+ 
+  As such, you need not add any code to this file.  You can write
+  all of your implementation code in the files for the individual
+  classification methods listed above.
+  """
+  </span><span style="color: blue; font-weight: bold">def </span>__init__<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>legalLabels<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    For digits dataset, the set of legal labels will be 0,1,..,9
+    For faces dataset, the set of legal labels will be 0 (non-face) or 1 (face)
+    """
+    </span><span style="color: blue">self</span><span style="font-weight: bold">.</span>legalLabels <span style="font-weight: bold">= </span>legalLabels
+    
+    
+  <span style="color: blue; font-weight: bold">def </span>train<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>trainingData<span style="font-weight: bold">, </span>trainingLabels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    This is the supervised training function for the classifier.  Two sets of 
+    labeled data are passed in: a large training set and a small validation set.
+    
+    Many types of classifiers have a common training structure in practice: using
+    training data for the main supervised training loop but tuning certain parameters
+    with a small held-out validation set.
+
+    For some classifiers (naive Bayes, MIRA), you will need to return the parameters' 
+    values after traning and tuning step.
+    
+    To make the classifier generic to multiple problems, the data should be represented
+    as lists of Counters containing feature descriptions and their counts.
+    """
+    </span>abstract
+    
+  <span style="color: blue; font-weight: bold">def </span>classify<span style="font-weight: bold">(</span><span style="color: blue">self</span><span style="font-weight: bold">, </span>data<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    This function returns a list of labels, each drawn from the set of legal labels
+    provided to the classifier upon construction.
+
+    To make the classifier generic to multiple problems, the data should be represented
+    as lists of Counters containing feature descriptions and their counts.
+    """
+    </span>abstract
+
+
+  </pre>
+  </body>
+  </html>
+  

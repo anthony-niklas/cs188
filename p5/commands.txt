@@ -1,0 +1,10 @@
+python dataClassifier.py  
+python dataClassifier.py -h  
+python dataClassifier.py -c naiveBayes --autotune 
+python dataClassifier.py -a -d digits -c naiveBayes -o -1 3 -2 6  
+python dataClassifier.py -c perceptron 
+python dataClassifier.py -c perceptron -w  
+python dataClassifier.py -c mira --autotune 
+python dataClassifier.py -d digits -c naiveBayes -f -a -t 1000  
+python dataClassifier.py -d digits -c minicontest
+python runMinicontest.py

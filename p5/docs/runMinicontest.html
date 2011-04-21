@@ -1,0 +1,70 @@
+<html>
+  <head>
+  <title>runMinicontest.py</title>
+  </head>
+  <body>
+  <h3>runMinicontest.py (<a href="../runMinicontest.py">original</a>)</h3>
+  <hr>
+  <pre>
+<span style="color: green; font-style: italic"># runMinicontest.py
+# -----------------
+# Licensing Information: Please do not distribute or publish solutions to this
+# project. You are free to use and extend these projects for educational
+# purposes. The Pacman AI projects were developed at UC Berkeley, primarily by
+# John DeNero (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
+# For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
+
+# This file is for running the minicontest submission.
+
+</span><span style="color: blue; font-weight: bold">import </span>minicontest
+<span style="color: blue; font-weight: bold">import </span>samples
+<span style="color: blue; font-weight: bold">import </span>sys
+<span style="color: blue; font-weight: bold">import </span>util
+<span style="color: blue; font-weight: bold">import </span>pickle
+<span style="color: blue; font-weight: bold">from </span>dataClassifier <span style="color: blue; font-weight: bold">import </span>DIGIT_DATUM_HEIGHT<span style="font-weight: bold">,</span>DIGIT_DATUM_WIDTH<span style="font-weight: bold">,</span>contestFeatureExtractorDigit
+
+TEST_SIZE <span style="font-weight: bold">= </span><span style="color: red">1000
+
+</span>MINICONTEST_PATH <span style="font-weight: bold">= </span><span style="color: red">"minicontest_output.pickle"
+
+
+</span><span style="color: blue; font-weight: bold">if </span>__name__ <span style="font-weight: bold">== </span><span style="color: red">'__main__'</span><span style="font-weight: bold">:
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Loading training data"
+  </span>rawTrainingData <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadDataFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/trainingimages"</span><span style="font-weight: bold">, </span><span style="color: red">5000</span><span style="font-weight: bold">,</span>DIGIT_DATUM_WIDTH<span style="font-weight: bold">,</span>DIGIT_DATUM_HEIGHT<span style="font-weight: bold">)
+  </span>trainingLabels <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadLabelsFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/traininglabels"</span><span style="font-weight: bold">, </span><span style="color: red">5000</span><span style="font-weight: bold">)
+  </span>rawValidationData <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadDataFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/validationimages"</span><span style="font-weight: bold">, </span><span style="color: red">100</span><span style="font-weight: bold">,</span>DIGIT_DATUM_WIDTH<span style="font-weight: bold">,</span>DIGIT_DATUM_HEIGHT<span style="font-weight: bold">)
+  </span>validationLabels <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadLabelsFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/validationlabels"</span><span style="font-weight: bold">, </span><span style="color: red">100</span><span style="font-weight: bold">)
+  </span>rawTestData <span style="font-weight: bold">= </span>samples<span style="font-weight: bold">.</span>loadDataFile<span style="font-weight: bold">(</span><span style="color: red">"digitdata/testimages"</span><span style="font-weight: bold">, </span>TEST_SIZE<span style="font-weight: bold">,</span>DIGIT_DATUM_WIDTH<span style="font-weight: bold">,</span>DIGIT_DATUM_HEIGHT<span style="font-weight: bold">)
+    
+ 
+  </span>featureFunction <span style="font-weight: bold">= </span>contestFeatureExtractorDigit
+  legalLabels <span style="font-weight: bold">= </span>range<span style="font-weight: bold">(</span><span style="color: red">10</span><span style="font-weight: bold">)
+  </span>classifier <span style="font-weight: bold">= </span>minicontest<span style="font-weight: bold">.</span>contestClassifier<span style="font-weight: bold">(</span>legalLabels<span style="font-weight: bold">)
+
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Extracting features..."
+  </span>trainingData <span style="font-weight: bold">= </span>map<span style="font-weight: bold">(</span>featureFunction<span style="font-weight: bold">, </span>rawTrainingData<span style="font-weight: bold">)
+  </span>validationData <span style="font-weight: bold">= </span>map<span style="font-weight: bold">(</span>featureFunction<span style="font-weight: bold">, </span>rawValidationData<span style="font-weight: bold">)
+  </span>testData <span style="font-weight: bold">= </span>map<span style="font-weight: bold">(</span>featureFunction<span style="font-weight: bold">, </span>rawTestData<span style="font-weight: bold">)
+
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Training..."
+  </span>classifier<span style="font-weight: bold">.</span>train<span style="font-weight: bold">(</span>trainingData<span style="font-weight: bold">, </span>trainingLabels<span style="font-weight: bold">, </span>validationData<span style="font-weight: bold">, </span>validationLabels<span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Validating..."
+  </span>guesses <span style="font-weight: bold">= </span>classifier<span style="font-weight: bold">.</span>classify<span style="font-weight: bold">(</span>validationData<span style="font-weight: bold">)
+  </span>correct <span style="font-weight: bold">= [</span>guesses<span style="font-weight: bold">[</span>i<span style="font-weight: bold">] == </span>validationLabels<span style="font-weight: bold">[</span>i<span style="font-weight: bold">] </span><span style="color: blue; font-weight: bold">for </span>i <span style="color: blue; font-weight: bold">in </span>range<span style="font-weight: bold">(</span>len<span style="font-weight: bold">(</span>validationLabels<span style="font-weight: bold">))].</span>count<span style="font-weight: bold">(</span><span style="color: blue; font-weight: bold">True</span><span style="font-weight: bold">)
+  </span><span style="color: blue; font-weight: bold">print </span>str<span style="font-weight: bold">(</span>correct<span style="font-weight: bold">), (</span><span style="color: red">"correct out of " </span><span style="font-weight: bold">+ </span>str<span style="font-weight: bold">(</span>len<span style="font-weight: bold">(</span>validationLabels<span style="font-weight: bold">)) + </span><span style="color: red">" (%.1f%%)."</span><span style="font-weight: bold">) % (</span><span style="color: red">100.0 </span><span style="font-weight: bold">* </span>correct <span style="font-weight: bold">/ </span>len<span style="font-weight: bold">(</span>validationLabels<span style="font-weight: bold">))
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Testing..."
+  </span>guesses <span style="font-weight: bold">= </span>classifier<span style="font-weight: bold">.</span>classify<span style="font-weight: bold">(</span>testData<span style="font-weight: bold">)
+
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Writing classifier output..."
+  </span>outfile <span style="font-weight: bold">= </span>open<span style="font-weight: bold">(</span>MINICONTEST_PATH<span style="font-weight: bold">,</span><span style="color: red">'w'</span><span style="font-weight: bold">)
+  </span>output <span style="font-weight: bold">= {}
+  </span>output<span style="font-weight: bold">[</span><span style="color: red">'guesses'</span><span style="font-weight: bold">] = </span>guesses;
+  pickle<span style="font-weight: bold">.</span>dump<span style="font-weight: bold">(</span>output<span style="font-weight: bold">,</span>outfile<span style="font-weight: bold">)
+  </span>outfile<span style="font-weight: bold">.</span>close<span style="font-weight: bold">()
+  </span><span style="color: blue; font-weight: bold">print </span><span style="color: red">"Write successful."
+  
+</span>
+  </pre>
+  </body>
+  </html>
+  
