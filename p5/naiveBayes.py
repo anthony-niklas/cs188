@@ -76,18 +76,23 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
             conditionals[pixel] = {0: util.Counter(), 1: util.Counter()}         
 
         # Calculate totals and counts
-        self.k = 0.0
+        self.k = 0.1
+        # Tried with k = 0.1 and got the hint results, does autotune choose the same thing?
         for i, datum in enumerate(trainingData):
             y = trainingLabels[i]
             for pixel, value in datum.items():
                 counts[pixel][value][y] += 1.0
                 totals[pixel][y] += 1.0 
                 
+        # How do we determine the best k?
+        # for k in kgrid:
+        
         # Normalize everything
+        k = self.k
         for pixel in self.features:
             for value in [0, 1]:
                 for y in self.legalLabels:
-                    conditionals[pixel][value][y] = (counts[pixel][value][y] + self.k) / (totals[pixel][y] + self.k)
+                    conditionals[pixel][value][y] = (counts[pixel][value][y] + k) / (totals[pixel][y] + k * 2)
                 
         self.conditionals = conditionals
                 
