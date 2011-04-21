@@ -69,32 +69,46 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         # Initialize stuff
         counts = {}
         totals = {}
-        conditionals = {}
-        for pixel in self.features:
-            counts[pixel] = {0: util.Counter(), 1: util.Counter()}
-            totals[pixel] = util.Counter()
-            conditionals[pixel] = {0: util.Counter(), 1: util.Counter()}         
-
+        for f in self.features:
+            counts[f] = {0: util.Counter(), 1: util.Counter()}
+            totals[f] = util.Counter()
+                     
         # Calculate totals and counts
-        self.k = 0.1
-        # Tried with k = 0.1 and got the hint results, does autotune choose the same thing?
         for i, datum in enumerate(trainingData):
             y = trainingLabels[i]
-            for pixel, value in datum.items():
-                counts[pixel][value][y] += 1.0
-                totals[pixel][y] += 1.0 
+            for f, value in datum.items():
+                counts[f][value][y] += 1.0
+                totals[f][y] += 1.0 
                 
-        # How do we determine the best k?
-        # for k in kgrid:
-        
-        # Normalize everything
-        k = self.k
-        for pixel in self.features:
-            for value in [0, 1]:
-                for y in self.legalLabels:
-                    conditionals[pixel][value][y] = (counts[pixel][value][y] + k) / (totals[pixel][y] + k * 2)
+        bestConditionals = {}
+        bestAccuracy = None
+        # Evaluate each k, and use the one that yields the best accuracy
+        for k in kgrid or [0.0]:
+            correct = 0
+            conditionals = {}            
+            for f in self.features:
+                conditionals[f] = {0: util.Counter(), 1: util.Counter()}
                 
-        self.conditionals = conditionals
+            # Normalize everything
+            for f in self.features:
+                for value in [0, 1]:
+                    for y in self.legalLabels:
+                        conditionals[f][value][y] = (counts[f][value][y] + k) / (totals[f][y] + k * 2)
+                
+            # Check the accuracy associated with this k
+            self.conditionals = conditionals              
+            guesses = self.classify(validationData)
+            for i, guess in enumerate(guesses):
+                correct += (validationLabels[i] == guess and 1.0 or 0.0)
+            accuracy = correct / len(guesses)
+            
+            # Keep the best k so far
+            if accuracy > bestAccuracy or bestAccuracy is None:
+                bestAccuracy = accuracy
+                bestConditionals = conditionals
+                self.k = k
+                
+        self.conditionals = bestConditionals
                 
     def classify(self, testData):
         """
@@ -124,8 +138,8 @@ class NaiveBayesClassifier(classificationMethod.ClassificationMethod):
         "*** YOUR CODE HERE ***"
         for y in self.legalLabels:
             logJoint[y] = math.log(self.P[y])
-            for pixel in self.features:
-                prob = self.conditionals[pixel][datum[pixel]][y]
+            for f in self.conditionals:
+                prob = self.conditionals[f][datum[f]][y]
                 logJoint[y] += (prob and math.log(prob) or 0.0)
 
         return logJoint
