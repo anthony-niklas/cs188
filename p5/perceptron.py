@@ -49,7 +49,21 @@ class PerceptronClassifier:
       print "Starting iteration ", iteration, "..."
       for i in range(len(trainingData)):
           "*** YOUR CODE HERE ***"
-          util.raiseNotDefined()
+          # Find the best label for each datum              
+          bestScore = None
+          bestY = None
+          datum = trainingData[i]
+          for y in self.legalLabels:
+              score = datum * self.weights[y]
+              if score > bestScore or bestScore is None:
+                  bestScore = score
+                  bestY = y
+          
+          actualY = trainingLabels[i]
+          if bestY != actualY:
+              # Wrong guess, update weights
+              self.weights[actualY] = self.weights[actualY] + datum
+              self.weights[bestY] = self.weights[bestY] - datum
     
   def classify(self, data ):
     """
